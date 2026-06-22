@@ -1,18 +1,21 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from config import Config
 from models import db, Student
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.secret_key = "collegeportal"
 
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -28,11 +31,13 @@ def login():
         ).first()
 
         if student:
-           return redirect('/dashboard')
+            session['student_id'] = student.id
+            return redirect('/dashboard')
 
         return "Invalid Email or Password"
 
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -57,13 +62,23 @@ def register():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+
+    if 'student_id' not in session:
+        return redirect('/login')
+
+    student = Student.query.get(session['student_id'])
+
+    return render_template(
+        'dashboard.html',
+        student=student
+    )
 
 
 @app.route('/logout')
 def logout():
+    session.clear()
     return redirect('/')
 
 
 if __name__ == '__main__':
- app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
