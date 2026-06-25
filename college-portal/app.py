@@ -16,7 +16,6 @@ with app.app_context():
 def home():
     return render_template('index.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -25,19 +24,23 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        student = Student.query.filter_by(
-            email=email,
-            password=password
-        ).first()
+        print("Email:", email)
+        print("Password:", password)
+
+        student = Student.query.filter_by(email=email).first()
+
+        print("Student:", student)
 
         if student:
-            session['student_id'] = student.id
-            return redirect('/dashboard')
+            print("DB Password:", student.password)
+
+            if student.password == password:
+                session['student_id'] = student.id
+                return redirect('/dashboard')
 
         return "Invalid Email or Password"
 
     return render_template('login.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
