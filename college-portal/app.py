@@ -62,7 +62,6 @@ def register():
 
     return render_template('register.html')
 
-
 @app.route('/dashboard')
 def dashboard():
 
@@ -75,8 +74,6 @@ def dashboard():
         'dashboard.html',
         student=student
     )
-
-
 @app.route('/logout')
 def logout():
     session.clear()
