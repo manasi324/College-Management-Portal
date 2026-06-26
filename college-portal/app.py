@@ -111,6 +111,9 @@ def edit_profile():
         return redirect('/profile')
 
     return render_template('edit_profile.html', student=student)
-
+@app.route('/students')
+def students():
+    students = Student.query.all()
+    return render_template('students.html', students=students)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
