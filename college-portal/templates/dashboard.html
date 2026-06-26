@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+   
     <title>Student Dashboard</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+</head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -62,37 +70,26 @@
         </div>
 
         <hr>
+<a href="/profile" class="text-white d-block mb-3">
+    <i class="bi bi-person-circle"></i> Profile
+</a>
 
-        <a href="#">
-            👤 Profile
-        </a>
+<a href="/notices" class="text-white d-block mb-3">
+    <i class="bi bi-megaphone"></i> Notices
+</a>
 
-        <a href="#">
-            📚 {{ student.course }}
-        </a>
+<a href="/events" class="text-white d-block mb-3">
+    <i class="bi bi-calendar-event"></i> Events
+</a>
 
-        <a href="#">
-            🎓 Year {{ student.year }}
-        </a>
+<a href="/materials" class="text-white d-block mb-3">
+    <i class="bi bi-book"></i> Study Materials
+</a>
 
-        <a href="#">
-            📢 Notices
-        </a>
-
-        <a href="#">
-            📅 Events
-        </a>
-
-        <a href="#">
-            📖 Study Materials
-        </a>
-
-        <hr>
-
-        <a href="/logout" class="text-danger">
-            🚪 Logout
-        </a>
-
+<a href="/logout" class="text-danger d-block">
+    <i class="bi bi-box-arrow-right"></i> Logout
+</a>
+       
     </div>
 
     <!-- Main Content -->
