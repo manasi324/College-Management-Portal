@@ -20,25 +20,30 @@ def home():
 def login():
 
     if request.method == 'POST':
-
         email = request.form['email']
         password = request.form['password']
 
-        print("Email:", email)
-        print("Password:", password)
+        # Admin Login
+        if email == "admin@college.com" and password == "admin123":
+            session.clear()
+            session['admin'] = True
+            return redirect('/admin_dashboard')
 
-        student = Student.query.filter_by(email=email).first()
-
-        print("Student:", student)
+        # Student Login
+        student = Student.query.filter_by(
+            email=email,
+            password=password
+        ).first()
 
         if student:
-            print("DB Password:", student.password)
+            session.clear()
+            session['student_id'] = student.id
+            return redirect('/dashboard')
 
-            if student.password == password:
-                session['student_id'] = student.id
-                return redirect('/dashboard')
-
-        return "Invalid Email or Password"
+        return render_template(
+            'login.html',
+            error="Invalid Email or Password"
+        )
 
     return render_template('login.html')
 
@@ -111,6 +116,29 @@ def edit_profile():
         return redirect('/profile')
 
     return render_template('edit_profile.html', student=student)
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+
+    if not session.get('admin'):
+        return redirect('/admin')
+
+    total_students = Student.query.count()
+    total_notices = 0
+    total_events = 0
+
+    return render_template(
+        'admin_dashboard.html',
+        total_students=total_students,
+        total_notices=total_notices,
+        total_events=total_events
+    )
+
+@app.route('/students')
+def students():
+    students = Student.query.all()
+    return render_template('students.html', students=students)
+ 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
