@@ -37,34 +37,49 @@
                             <input type="password" name="password" class="form-control" required>
                         </div>
 
-                        <div class="mb-3">
-                            <label>Course</label>
-                            <input type="text" name="course" class="form-control">
-                        </div>
+                        <div class="mb-3" id="courseDiv">
+    <label>Course</label>
 
-                        <div class="mb-3">
-                            <label>Year</label>
-                            <input type="number" name="year" class="form-control">
-                        </div>
-<div class="mb-3">
-    <label>Register As</label>
-    <select name="role" class="form-control">
-        <option value="Student">Student</option>
-        <option value="HOD">HOD</option>
-        <option value="Teacher">Teacher</option>
-    </select>
-</div>
-
-<div class="mb-3">
-    <label>Department</label>
-    <select name="department" class="form-control">
-
+    <select name="course" class="form-control">
+        <option value="">Select Course</option>
         <option>BSC CS & IT</option>
         <option>BCOM</option>
         <option>BAF</option>
         <option>BMS</option>
         <option>BAMMC</option>
+    </select>
+</div>
 
+<div class="mb-3" id="yearDiv">
+    <label>Year</label>
+
+    <select name="year" class="form-control">
+        <option value="">Select Year</option>
+        <option>FY</option>
+        <option>SY</option>
+        <option>TY</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label>Register As</label>
+
+    <select name="role" id="role" class="form-control" onchange="toggleFields()">
+        <option value="Student">Student</option>
+        <option value="HOD">HOD</option>
+        <option value="Teacher">Teacher</option>
+    </select>
+</div>
+<div class="mb-3" id="departmentDiv" style="display:none;">
+    <label>Department</label>
+
+    <select name="department" class="form-control">
+        <option value="">Select Department</option>
+        <option>BSC CS & IT</option>
+        <option>BCOM</option>
+        <option>BAF</option>
+        <option>BMS</option>
+        <option>BAMMC</option>
     </select>
 </div>
                         <button type="submit" class="btn btn-success w-100">
@@ -81,6 +96,30 @@
 
     </div>
 </div>
+<script>
+function toggleFields() {
 
+    let role = document.getElementById("role").value;
+
+    let courseDiv = document.getElementById("courseDiv");
+    let yearDiv = document.getElementById("yearDiv");
+    let departmentDiv = document.getElementById("departmentDiv");
+
+    if (role === "Student") {
+
+        courseDiv.style.display = "block";
+        yearDiv.style.display = "block";
+        departmentDiv.style.display = "none";
+
+    } else if (role === "HOD" || role === "Teacher") {
+
+        courseDiv.style.display = "none";
+        yearDiv.style.display = "none";
+        departmentDiv.style.display = "block";
+    }
+}
+
+window.onload = toggleFields;
+</script>
 </body>
 </html>
