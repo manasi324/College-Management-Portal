@@ -8,7 +8,7 @@ class Student(db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     course = db.Column(db.String(100))
-    year = db.Column(db.Integer)
+    year = db.Column(db.String(10))
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
     department = db.relationship('Department')
     
