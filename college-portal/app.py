@@ -1,15 +1,17 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from config import Config
 from models import db, Student, User, Department, Notice, Event, Material
+
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = "collegeportal"
 
 db.init_app(app)
 
-# Add this block here
 with app.app_context():
+
     db.create_all()
+    print("✅ Database connected successfully!")
 
     departments = [
         "BSC CS & IT",
@@ -33,7 +35,6 @@ with app.app_context():
         db.session.add(principal)
 
     db.session.commit()
-
 with app.app_context():
     db.create_all()
 
@@ -41,15 +42,15 @@ with app.app_context():
 @app.route('/')
 def home():
     return render_template('index.html')
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
     if request.method == 'POST':
+
         email = request.form['email']
         password = request.form['password']
 
-        # Check Principal / HOD / Teacher
+        # Principal / HOD / Teacher
         user = User.query.filter_by(
             email=email,
             password=password
@@ -61,17 +62,23 @@ def login():
 
             if user.role == "Principal":
                 session["role"] = "Principal"
-                return redirect('/principal_dashboard')
+                return redirect("/principal_dashboard")
 
             elif user.role == "HOD":
+                session["user_id"] = user.id
                 session["role"] = "HOD"
                 session["department"] = user.department.name
-                return redirect('/hod_dashboard')
+                session["department_id"] = user.department_id
+
+                return redirect("/hod_dashboard")
 
             elif user.role == "Teacher":
+                session["user_id"] = user.id
                 session["role"] = "Teacher"
                 session["department"] = user.department.name
-                return redirect('/teacher_dashboard')
+                session["department_id"] = user.department_id
+
+                return redirect("/teacher_dashboard")
 
         # Student Login
         student = Student.query.filter_by(
@@ -81,15 +88,15 @@ def login():
 
         if student:
             session.clear()
-            session['student_id'] = student.id
-            return redirect('/dashboard')
+            session["student_id"] = student.id
+            return redirect("/dashboard")
 
         return render_template(
-            'login.html',
+            "login.html",
             error="Invalid Email or Password"
         )
 
-    return render_template('login.html')
+    return render_template("login.html")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -254,6 +261,7 @@ def manage_notices():
 
     notices = Notice.query.all()
     return render_template('manage_notices.html', notices=notices)
+
 @app.route('/manage_events', methods=['GET', 'POST'])
 def manage_events():
     if session.get("role") != "Principal":
@@ -301,14 +309,19 @@ def principal_dashboard():
     return render_template('principal_dashboard.html')
 
 
-@app.route('/hod_dashboard')
+
+@app.route("/hod_dashboard")
 def hod_dashboard():
-    return render_template('hod_dashboard.html')
 
+    if session.get("role") != "HOD":
+        return redirect(url_for("login"))
 
-@app.route('/teacher_dashboard')
-def teacher_dashboard():
-    return render_template('teacher_dashboard.html')
+    hod = User.query.get(session["user_id"])
+
+    return render_template(
+        "hod_dashboard.html",
+        hod=hod
+    )
 
 @app.route('/manage_hods')
 def manage_hods():
