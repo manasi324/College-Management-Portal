@@ -1,0 +1,13 @@
+<h2>Notices</h2>
+
+{% if notices %}
+    {% for notice in notices %}
+        <div>
+            <h3>{{ notice.title }}</h3>
+            <p>{{ notice.description }}</p>
+            <hr>
+        </div>
+    {% endfor %}
+{% else %}
+    <h3>No notices available.</h3>
+{% endif %}

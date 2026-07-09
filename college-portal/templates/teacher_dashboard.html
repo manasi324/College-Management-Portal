@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Teacher Dashboard</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial;
+        }
+
+        body{
+            background:#f4f6f9;
+        }
+
+        .header{
+            background:#0d6efd;
+            color:white;
+            padding:20px;
+            text-align:center;
+        }
+
+        .container{
+            width:90%;
+            margin:auto;
+            margin-top:30px;
+        }
+
+        .welcome{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            margin-bottom:30px;
+            box-shadow:0 0 10px lightgray;
+        }
+
+        .cards{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:20px;
+        }
+
+        .card{
+            background:white;
+            padding:30px;
+            text-align:center;
+            border-radius:10px;
+            box-shadow:0 0 10px lightgray;
+        }
+
+        .card h2{
+            color:#0d6efd;
+            margin-bottom:10px;
+        }
+
+        .menu{
+            margin-top:40px;
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:20px;
+        }
+
+        .menu a{
+            text-decoration:none;
+            background:#0d6efd;
+            color:white;
+            padding:18px;
+            text-align:center;
+            border-radius:8px;
+            font-size:18px;
+        }
+
+        .menu a:hover{
+            background:#084298;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Teacher Dashboard</h1>
+</div>
+
+<div class="container">
+
+<div class="welcome">
+
+<h2>Welcome, {{ teacher.name }}</h2>
+
+<h3>Department : {{ teacher.department.name }}</h3>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+<h2>{{ total_students }}</h2>
+<p>Total Students</p>
+</div>
+
+<div class="card">
+<h2>{{ total_materials }}</h2>
+<p>Study Materials</p>
+</div>
+
+<div class="card">
+<h2>{{ total_notices }}</h2>
+<p>Notices</p>
+</div>
+
+<div class="card">
+<h2>{{ total_events }}</h2>
+<p>Events</p>
+</div>
+
+</div>
+
+<div class="menu">
+
+<a href="/teacher_students">👨‍🎓 Students</a>
+
+<a href="/attendance">✅ Attendance</a>
+
+<a href="/upload_material">📚 Upload Material</a>
+
+<a href="/marks">📝 Internal Marks</a>
+
+<a href="/notices">📢 Notices</a>
+
+<a href="/logout">🚪 Logout</a>
+
+</div>
+
+</div>
+
+</body>
+</html>

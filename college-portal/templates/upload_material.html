@@ -1,0 +1,14 @@
+<h2>Study Materials</h2>
+
+{% if materials %}
+    {% for material in materials %}
+        <div>
+            <h3>{{ material.subject }}</h3>
+            <p>{{ material.title }}</p>
+            <a href="{{ material.link }}">Open Material</a>
+            <hr>
+        </div>
+    {% endfor %}
+{% else %}
+    <h3>No study materials available.</h3>
+{% endif %}

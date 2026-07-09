@@ -65,14 +65,16 @@ def login():
                 return redirect("/principal_dashboard")
 
             elif user.role == "HOD":
+                session.clear()
                 session["user_id"] = user.id
                 session["role"] = "HOD"
                 session["department"] = user.department.name
                 session["department_id"] = user.department_id
 
-                return redirect("/hod_dashboard")
+                return redirect(url_for("hod_dashboard"))
 
             elif user.role == "Teacher":
+                session.clear()
                 session["user_id"] = user.id
                 session["role"] = "Teacher"
                 session["department"] = user.department.name
@@ -314,13 +316,55 @@ def principal_dashboard():
 def hod_dashboard():
 
     if session.get("role") != "HOD":
-        return redirect(url_for("login"))
+        return redirect("/login")
 
     hod = User.query.get(session["user_id"])
 
+    total_students = Student.query.filter_by(
+        department_id=hod.department_id
+    ).count()
+
+    total_teachers = User.query.filter_by(
+        role="Teacher",
+        department_id=hod.department_id
+    ).count()
+
+    total_notices = Notice.query.count()
+
+    total_materials = Material.query.count()
+
     return render_template(
         "hod_dashboard.html",
-        hod=hod
+        hod=hod,
+        total_students=total_students,
+        total_teachers=total_teachers,
+        total_notices=total_notices,
+        total_materials=total_materials
+    )
+
+@app.route("/teacher_dashboard")
+def teacher_dashboard():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    total_students = Student.query.filter_by(
+        department_id=teacher.department_id
+    ).count()
+
+    total_materials = Material.query.count()
+    total_notices = Notice.query.count()
+    total_events = Event.query.count()
+
+    return render_template(
+        "teacher_dashboard.html",
+        teacher=teacher,
+        total_students=total_students,
+        total_materials=total_materials,
+        total_notices=total_notices,
+        total_events=total_events
     )
 
 @app.route('/manage_hods')
@@ -335,6 +379,75 @@ def manage_hods():
         'manage_hods.html',
         hods=hods
     )
+@app.route("/hod_students")
+def hod_students():
+    return "<h2>Manage Students - Coming Soon</h2>"
 
+
+@app.route("/hod_teachers")
+def hod_teachers():
+    return "<h2>Manage Teachers - Coming Soon</h2>"
+
+
+@app.route("/department_notices")
+def department_notices():
+    return "<h2>Department Notices - Coming Soon</h2>"
+
+
+@app.route("/study_materials")
+def study_materials():
+    return "<h2>Study Materials - Coming Soon</h2>"
+
+
+@app.route("/attendance")
+def attendance():
+    return "<h2>Attendance - Coming Soon</h2>"
+
+
+@app.route("/assignments")
+def assignments():
+    return "<h2>Assignments - Coming Soon</h2>"
+
+
+@app.route("/marks")
+def marks():
+    return "<h2>Internal Marks - Coming Soon</h2>"
+
+@app.route("/teacher_students")
+def teacher_students():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    students = Student.query.filter_by(
+        department_id=teacher.department_id
+    ).all()
+
+    return render_template(
+        "teacher_students.html",
+        students=students
+    )
+
+@app.route("/upload_material")
+def upload_material():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    return render_template("upload_material.html")
+@app.route("/teacher_notices")
+def teacher_notices():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    notices = Notice.query.all()
+
+    return render_template(
+        "teacher_notices.html",
+        notices=notices
+    )
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
