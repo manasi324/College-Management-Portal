@@ -449,5 +449,16 @@ def teacher_notices():
         "teacher_notices.html",
         notices=notices
     )
+
+    @app.route("/")
+    def home():
+      notices = Notice.query.order_by(Notice.id.desc()).limit(5).all()
+      events = Event.query.order_by(Event.id.desc()).limit(5).all()
+
+    return render_template(
+        "index.html",
+        notices=notices,
+        events=events
+    )
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -8,7 +8,7 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
             "ssl": {
-                "ca": r"C:\Users\DESKTOP\Downloads\isrgrootx1.pem"
+                "ca": r"C:\Users\Admin\Downloads\isrgrootx1.pem"
             }
         }
     }
