@@ -7,6 +7,7 @@ app.config.from_object(Config)
 app.secret_key = "collegeportal"
 
 db.init_app(app)
+print(app.config["SQLALCHEMY_DATABASE_URI"])
 
 with app.app_context():
 
@@ -155,24 +156,36 @@ def dashboard():
     )
 @app.route('/profile')
 def profile():
+    if 'student_id' not in session:
+        return redirect('/login')
     student = Student.query.get(session['student_id'])
     return render_template('profile.html', student=student)
 
-@app.route('/notices')
-def notices():
+@app.route('/student/notices')
+def student_notices():
+    if 'student_id' not in session:
+        return redirect('/login')
+
     notices = Notice.query.all()
     return render_template('notices.html', notices=notices)
 
-@app.route('/events')
-def events():
+
+@app.route('/student/events')
+def student_events():
+    if 'student_id' not in session:
+        return redirect('/login')
+
     events = Event.query.all()
     return render_template('events.html', events=events)
 
-@app.route('/materials')
-def materials():
+
+@app.route('/student/materials')
+def student_materials():
+    if 'student_id' not in session:
+        return redirect('/login')
+
     materials = Material.query.all()
     return render_template('materials.html', materials=materials)
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -246,7 +259,6 @@ def edit_student(id):
 @app.route('/manage_notices', methods=['GET', 'POST'])
 def manage_notices():
 
-    # Principal only
     if session.get("role") != "Principal":
         return redirect('/login')
 
@@ -259,10 +271,17 @@ def manage_notices():
         db.session.add(notice)
         db.session.commit()
 
+        print("Saved Notice:", notice.id)
+
+        all_notices = Notice.query.all()
+        print("All Notices:", all_notices)
+
         return redirect('/manage_notices')
 
     notices = Notice.query.all()
-    return render_template('manage_notices.html', notices=notices)
+    print("GET Notices:", notices)
+
+    return render_template("manage_notices.html", notices=notices)
 
 @app.route('/manage_events', methods=['GET', 'POST'])
 def manage_events():
@@ -450,15 +469,5 @@ def teacher_notices():
         notices=notices
     )
 
-    @app.route("/")
-    def home():
-      notices = Notice.query.order_by(Notice.id.desc()).limit(5).all()
-      events = Event.query.order_by(Event.id.desc()).limit(5).all()
-
-    return render_template(
-        "index.html",
-        notices=notices,
-        events=events
-    )
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
