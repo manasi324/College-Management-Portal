@@ -283,6 +283,35 @@ def manage_notices():
 
     return render_template("manage_notices.html", notices=notices)
 
+@app.route('/edit_notice/<int:id>', methods=['GET', 'POST'])
+def edit_notice(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    notice = Notice.query.get_or_404(id)
+
+    if request.method == "POST":
+        notice.title = request.form["title"]
+        notice.description = request.form["description"]
+
+        db.session.commit()
+        return redirect("/manage_notices")
+
+    return render_template("edit_notice.html", notice=notice)
+
+
+@app.route('/delete_notice/<int:id>')
+def delete_notice(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    notice = Notice.query.get_or_404(id)
+
+    db.session.delete(notice)
+    db.session.commit()
+
+    return redirect("/manage_notices")
+
 @app.route('/manage_events', methods=['GET', 'POST'])
 def manage_events():
     if session.get("role") != "Principal":
@@ -302,6 +331,37 @@ def manage_events():
     events = Event.query.all()
     return render_template('manage_events.html', events=events)
     return render_template('edit_student.html', student=student)
+
+@app.route('/edit_event/<int:id>', methods=['GET', 'POST'])
+def edit_event(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    event = Event.query.get_or_404(id)
+
+    if request.method == "POST":
+        event.title = request.form["title"]
+        event.date = request.form["date"]
+        event.description = request.form["description"]
+
+        db.session.commit()
+
+        return redirect("/manage_events")
+
+    return render_template("edit_event.html", event=event)
+
+
+@app.route('/delete_event/<int:id>')
+def delete_event(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    event = Event.query.get_or_404(id)
+
+    db.session.delete(event)
+    db.session.commit()
+
+    return redirect("/manage_events")
 
 @app.route('/manage_materials', methods=['GET', 'POST'])
 def manage_materials():
@@ -327,8 +387,21 @@ def manage_materials():
 def principal_dashboard():
     if session.get("role") != "Principal":
         return redirect("/login")
-    return render_template('principal_dashboard.html')
 
+    total_students = Student.query.count()
+    total_teachers = User.query.filter_by(role="Teacher").count()
+    total_hods = User.query.filter_by(role="HOD").count()
+    total_notices = Notice.query.count()
+    total_events = Event.query.count()
+
+    return render_template(
+        'principal_dashboard.html',
+        total_students=total_students,
+        total_teachers=total_teachers,
+        total_hods=total_hods,
+        total_notices=total_notices,
+        total_events=total_events
+    )
 
 
 @app.route("/hod_dashboard")
@@ -407,6 +480,49 @@ def hod_students():
 def hod_teachers():
     return "<h2>Manage Teachers - Coming Soon</h2>"
 
+@app.route('/manage_teachers')
+def manage_teachers():
+
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    teachers = User.query.filter_by(role="Teacher").all()
+
+    return render_template(
+        "manage_teachers.html",
+        teachers=teachers
+    )
+
+@app.route('/add_teacher', methods=['GET', 'POST'])
+def add_teacher():
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    if request.method == "POST":
+
+        department = Department.query.filter_by(
+            name=request.form["department"]
+        ).first()
+
+        teacher = User(
+            name=request.form["name"],
+            email=request.form["email"],
+            password=request.form["password"],
+            role="Teacher",
+            department_id=department.id
+        )
+
+        db.session.add(teacher)
+        db.session.commit()
+
+        return redirect("/manage_teachers")
+
+    departments = Department.query.all()
+
+    return render_template(
+        "add_teacher.html",
+        departments=departments
+    )
 
 @app.route("/department_notices")
 def department_notices():
@@ -456,6 +572,7 @@ def upload_material():
         return redirect("/login")
 
     return render_template("upload_material.html")
+
 @app.route("/teacher_notices")
 def teacher_notices():
 
@@ -468,6 +585,83 @@ def teacher_notices():
         "teacher_notices.html",
         notices=notices
     )
+# ---------- TEACHER MANAGEMENT ----------
+@app.route('/edit_teacher/<int:id>', methods=['GET', 'POST'])
+def edit_teacher(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    teacher = User.query.get_or_404(id)
+    if request.method == "POST":
+        teacher.name = request.form["name"]
+        teacher.email = request.form["email"]
+        teacher.password = request.form["password"]
+        department = Department.query.filter_by(name=request.form["department"]).first()
+        teacher.department_id = department.id
+        db.session.commit()
+        return redirect("/manage_teachers")
+    departments = Department.query.all()
+    department = Department.query.filter_by(name=request.form["department"]).first()
+    teacher.department_id = department.id
+    db.session.commit()
+    return redirect("/manage_teachers")
+    departments = Department.query.all()
+    return render_template("edit_teacher.html", teacher=teacher, departments=departments)
+@app.route('/delete_teacher/<int:id>')
+def delete_teacher(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    teacher = User.query.get_or_404(id)
+    db.session.delete(teacher)
+    db.session.commit()
+    return redirect("/manage_teachers")
+
+# ---------- HOD MANAGEMENT ----------
+@app.route('/add_hod', methods=['GET', 'POST'])
+def add_hod():
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    if request.method == "POST":
+        department = Department.query.filter_by(name=request.form["department"]).first()
+        hod = User(
+            name=request.form["name"],
+            email=request.form["email"],
+            password=request.form["password"],
+            role="HOD",
+            department_id=department.id
+        )
+        db.session.add(hod)
+        db.session.commit()
+        return redirect("/manage_hods")
+    departments = Department.query.all()
+    return render_template("add_hod.html", departments=departments)
+
+
+@app.route('/edit_hod/<int:id>', methods=['GET', 'POST'])
+def edit_hod(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    hod = User.query.get_or_404(id)
+    if request.method == "POST":
+        hod.name = request.form["name"]
+        hod.email = request.form["email"]
+        hod.password = request.form["password"]
+        department = Department.query.filter_by(name=request.form["department"]).first()
+        hod.department_id = department.id
+        db.session.commit()
+        return redirect("/manage_hods")
+    departments = Department.query.all()
+    return render_template("edit_hod.html", hod=hod, departments=departments)
+
+
+@app.route('/delete_hod/<int:id>')
+def delete_hod(id):
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    hod = User.query.get_or_404(id)
+    db.session.delete(hod)
+    db.session.commit()
+    return redirect("/manage_hods")
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

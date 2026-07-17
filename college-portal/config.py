@@ -9,6 +9,7 @@ class Config:
         "connect_args": {
             "ssl": {
                 "ca": r"C:\Users\Admin\Downloads\isrgrootx1.pem"
+
             }
         }
     }

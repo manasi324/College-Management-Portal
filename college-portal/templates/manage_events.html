@@ -38,28 +38,44 @@
     </div>
 
     <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Description</th>
-            </tr>
-        </thead>
 
-        <tbody>
-        {% for event in events %}
-            <tr>
-                <td>{{ event.id }}</td>
-                <td>{{ event.title }}</td>
-                <td>{{ event.date }}</td>
-                <td>{{ event.description }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+    </thead>
 
-    </table>
+    <tbody>
 
+    {% for event in events %}
+        <tr>
+            <td>{{ event.id }}</td>
+            <td>{{ event.title }}</td>
+            <td>{{ event.date }}</td>
+            <td>{{ event.description }}</td>
+
+            <td>
+                <a href="{{ url_for('edit_event', id=event.id) }}"
+                   class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+
+                <a href="{{ url_for('delete_event', id=event.id) }}"
+                   class="btn btn-danger btn-sm">
+                    Delete
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+
+    </tbody>
+
+</table>
+  <a href="{{ url_for('principal_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
 </body>
