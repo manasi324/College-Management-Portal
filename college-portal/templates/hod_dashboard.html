@@ -1,144 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOD Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body{
-            background:#f5f7fa;
+            background:#f4f7fc;
         }
 
-        
-.sidebar{
-    width:280px;
-    min-height:100vh;
-    background:#0d6efd;
-    color:white;
-    padding:20px;
-}
-
-        .sidebar a{
-            color:white;
-            text-decoration:none;
-            display:block;
-            padding:12px;
-            margin-bottom:10px;
-            border-radius:8px;
+        .navbar{
+            background:linear-gradient(90deg,#1f3cff,#6b2cff);
         }
 
-        .sidebar a:hover{
-            background:white;
-            color:#0d6efd;
-        }
-
-        .card{
+        .card-box{
             border:none;
-            border-radius:15px;
-            box-shadow:0 5px 15px rgba(0,0,0,.1);
+            border-radius:18px;
+            box-shadow:0 8px 20px rgba(0,0,0,.08);
+            transition:.3s;
+            text-decoration:none;
+            color:black;
         }
-    </style>
 
+        .card-box:hover{
+            transform:translateY(-5px);
+        }
+
+        .icon{
+            width:70px;
+            height:70px;
+            border-radius:18px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:30px;
+            color:white;
+            margin:auto;
+            margin-top:20px;
+            margin-bottom:20px;
+        }
+
+        .blue{background:#4d7cff;}
+        .green{background:#25c9a6;}
+        .pink{background:#f05ac9;}
+        .orange{background:#ffb347;}
+    </style>
 </head>
 
 <body>
 
-<div class="container-fluid">
+<nav class="navbar navbar-dark">
+    <div class="container-fluid px-4">
+        <h3 class="text-white">
+            <i class="bi bi-mortarboard-fill"></i>
+            HOD Dashboard
+        </h3>
 
-<div class="row">
+        <a href="/logout" class="btn btn-outline-light">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</nav>
 
-<div class="col-md-1 sidebar">
+<div class="container mt-5">
 
-<h3>HOD Panel</h3>
-<hr>
+    <h1>Welcome back, {{ hod.name }} 👋</h1>
+    <p class="text-muted">
+        Manage your department from one place.
+    </p>
 
-<p><strong>Welcome</strong></p>
-<p>{{ hod.name }}</p>
+    <div class="row mt-4 g-4">
 
-<p><strong>Department</strong></p>
-<p>{{ hod.department.name }}</p>
+        <div class="col-md-6 col-lg-4">
+            <a href="/hod_students" class="card card-box p-4">
+                <div class="icon blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
 
-<hr>
+                <h4 class="text-center">Manage Students</h4>
+                <p class="text-center text-muted">
+                    View & Edit Students
+                </p>
+            </a>
+        </div>
 
-<a href="{{ url_for('hod_students') }}">👨‍🎓 Manage Students</a>
+        <div class="col-md-6 col-lg-4">
+            <a href="/hod_teachers" class="card card-box p-4">
+                <div class="icon pink">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
 
-<a href="{{ url_for('hod_teachers') }}">👨‍🏫 Manage Teachers</a>
+                <h4 class="text-center">Manage Teachers</h4>
+                <p class="text-center text-muted">
+                    View & Edit Teachers
+                </p>
+            </a>
+        </div>
 
-<a href="{{ url_for('department_notices') }}">📢 Department Notices</a>
+        <div class="col-md-6 col-lg-4">
+            <a href="/department_notices" class="card card-box p-4">
+                <div class="icon green">
+                    <i class="bi bi-megaphone-fill"></i>
+                </div>
 
-<a href="{{ url_for('study_materials') }}">📚 Study Materials</a>
+                <h4 class="text-center">Department Notices</h4>
+                <p class="text-center text-muted">
+                    Manage Notices
+                </p>
+            </a>
+        </div>
 
-<a href="{{ url_for('attendance') }}">✅ Attendance</a>
+        <div class="col-md-6 col-lg-4">
+            <a href="/study_materials" class="card card-box p-4">
+                <div class="icon orange">
+                    <i class="bi bi-book-fill"></i>
+                </div>
 
-<a href="{{ url_for('assignments') }}">📝 Assignments</a>
+                <h4 class="text-center">Study Materials</h4>
+                <p class="text-center text-muted">
+                    Upload & Manage Materials
+                </p>
+            </a>
+        </div>
 
-<a href="{{ url_for('marks') }}">📊 Internal Marks</a>
-
-<a href="{{ url_for('logout') }}">🚪 Logout</a>
-
-</div>
-
-
-<div class="col-md-9 p-4">
-
-<h2>HOD Dashboard</h2>
-
-<div class="row mt-4">
-
-<div class="col-md-3">
-
-<div class="card p-3 text-center">
-
-<h5>Total Students</h5>
-
-<h2>{{ total_students }}</h2>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card p-3 text-center">
-
-<h5>Total Teachers</h5>
-
-<h2>{{ total_teachers }}</h2>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card p-3 text-center">
-
-<h5>Notices</h5>
-
-<h2>{{ total_notices }}</h2>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card p-3 text-center">
-
-<h5>Materials</h5>
-
-<h2>{{ total_materials }}</h2>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
