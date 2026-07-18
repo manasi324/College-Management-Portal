@@ -207,24 +207,6 @@ def edit_profile():
 
     return render_template('edit_profile.html', student=student)
 
-
-@app.route('/admin_dashboard')
-def admin_dashboard():
-
-    if not session.get('admin'):
-        return redirect('/login')
-
-    total_students = Student.query.count()
-    total_notices = 0
-    total_events = 0
-
-    return render_template(
-        'admin_dashboard.html',
-        total_students=total_students,
-        total_notices=total_notices,
-        total_events=total_events
-    )
-
 @app.route('/students')
 def students():
     if session.get("role") != "Principal":
@@ -387,22 +369,7 @@ def manage_materials():
 def principal_dashboard():
     if session.get("role") != "Principal":
         return redirect("/login")
-
-    total_students = Student.query.count()
-    total_teachers = User.query.filter_by(role="Teacher").count()
-    total_hods = User.query.filter_by(role="HOD").count()
-    total_notices = Notice.query.count()
-    total_events = Event.query.count()
-
-    return render_template(
-        'principal_dashboard.html',
-        total_students=total_students,
-        total_teachers=total_teachers,
-        total_hods=total_hods,
-        total_notices=total_notices,
-        total_events=total_events
-    )
-
+    return render_template('principal_dashboard.html')
 
 @app.route("/hod_dashboard")
 def hod_dashboard():
