@@ -17,31 +17,42 @@ class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False) 
+
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     date = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
+
 class Material(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(100), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     link = db.Column(db.String(300), nullable=False)
+
 class Department(db.Model):
     __tablename__ = "departments"
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
 
-
 class User(db.Model):
     __tablename__ = "users"
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(20), nullable=False)   # Principal, HOD, Teacher
-
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
     department = db.relationship('Department')
+    is_verified = db.Column(db.Boolean, default=False)  # For HOD verification by Principal
+
+class HODRegistration(db.Model):
+    __tablename__ = "hod_registrations"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
+    department = db.relationship('Department')
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    created_at = db.Column(db.DateTime, default=db.func.now())
