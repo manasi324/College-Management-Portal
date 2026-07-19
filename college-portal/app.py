@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from config import Config
-from models import db, Student, User, Department, Notice, Event, Material
+from models import db, Student, User, Department, Teacher, HOD, Notice, Event, Material, Attendance, Mark
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -113,32 +114,48 @@ def register():
                 email=request.form['email'],
                 password=request.form['password'],
                 course=request.form['course'],
-                year=request.form['year']
+                year=request.form['year'],
+                department_id=Department.query.filter_by(
+                    name=request.form['department']
+                ).first().id
             )
+
             db.session.add(student)
 
         elif role == "HOD":
-            # Simple HOD Registration - directly add to users table
+
             department = Department.query.filter_by(
                 name=request.form['department']
             ).first()
 
-            # Check if email already exists
             if User.query.filter_by(email=request.form['email']).first():
                 departments = Department.query.all()
-                return render_template('register.html', departments=departments,
-                                     error="Email already registered")
+                return render_template(
+                    'register.html',
+                    departments=departments,
+                    error="Email already registered"
+                )
 
-            hod = User(
+            user = User(
                 name=request.form['name'],
                 email=request.form['email'],
                 password=request.form['password'],
                 role="HOD",
                 department_id=department.id
             )
+
+            db.session.add(user)
+            db.session.flush()
+
+            hod = HOD(
+                user_id=user.id,
+                department_id=department.id
+            )
+
             db.session.add(hod)
 
-        else:  # Teacher
+        else:   # Teacher
+
             department = Department.query.filter_by(
                 name=request.form['department']
             ).first()
@@ -147,22 +164,26 @@ def register():
                 name=request.form['name'],
                 email=request.form['email'],
                 password=request.form['password'],
-                role=role,
+                role="Teacher",
                 department_id=department.id
             )
+
             db.session.add(user)
+            db.session.flush()
+
+            teacher = Teacher(
+                user_id=user.id,
+                department_id=department.id
+            )
+
+            db.session.add(teacher)
 
         db.session.commit()
+
         return redirect('/login')
 
     departments = Department.query.all()
     return render_template('register.html', departments=departments)
-
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
 
 
 # ==================== STUDENT ROUTES ====================
@@ -552,11 +573,19 @@ def hod_students():
 def hod_teachers():
     if session.get("role") != "HOD":
         return redirect("/login")
-    
-    hod = User.query.get(session["user_id"])
-    teachers = User.query.filter_by(role="Teacher", department_id=hod.department_id).all()
-    return render_template("hod_teachers.html", teachers=teachers)
 
+    department_id = session["department_id"]
+
+    teachers = (
+        Teacher.query
+        .filter_by(department_id=department_id)
+        .all()
+    )
+
+    return render_template(
+        "hod_teachers.html",
+        teachers=teachers
+    )
 
 @app.route("/department_notices")
 def department_notices():
