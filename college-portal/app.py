@@ -313,7 +313,16 @@ def edit_student(id):
         else:
             return redirect("/hod_students")
 
-    return render_template("edit_student.html", student=student)
+    if session.get("role") == "Principal":
+         back_url = url_for("students")
+    else:
+      back_url = url_for("hod_students")
+
+    return render_template(
+    "edit_student.html",
+    student=student,
+    back_url=back_url
+)
 
 
 @app.route('/manage_notices', methods=['GET', 'POST'])
