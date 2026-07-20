@@ -264,24 +264,56 @@ def students():
 @app.route('/delete_student/<int:id>')
 def delete_student(id):
     student = Student.query.get_or_404(id)
+
+    # Check user role
+    if session.get("role") == "Principal":
+        pass
+
+    elif session.get("role") == "HOD":
+        if student.department_id != session.get("department_id"):
+            return "Access Denied", 403
+
+    else:
+        return redirect("/login")
+
     db.session.delete(student)
     db.session.commit()
-    return redirect('/students')
+
+    if session.get("role") == "Principal":
+        return redirect("/students")
+    else:
+        return redirect("/hod_students")
 
 
 @app.route('/edit_student/<int:id>', methods=['GET', 'POST'])
 def edit_student(id):
     student = Student.query.get_or_404(id)
 
-    if request.method == 'POST':
-        student.name = request.form['name']
-        student.email = request.form['email']
-        student.course = request.form['course']
-        student.year = request.form['year']
-        db.session.commit()
-        return redirect('/students')
+    # Check user role
+    if session.get("role") == "Principal":
+        pass
 
-    return render_template('edit_student.html', student=student)
+    elif session.get("role") == "HOD":
+        if student.department_id != session.get("department_id"):
+            return "Access Denied", 403
+
+    else:
+        return redirect("/login")
+
+    if request.method == "POST":
+        student.name = request.form["name"]
+        student.email = request.form["email"]
+        student.course = request.form["course"]
+        student.year = request.form["year"]
+
+        db.session.commit()
+
+        if session.get("role") == "Principal":
+            return redirect("/students")
+        else:
+            return redirect("/hod_students")
+
+    return render_template("edit_student.html", student=student)
 
 
 @app.route('/manage_notices', methods=['GET', 'POST'])
@@ -563,11 +595,15 @@ def hod_dashboard():
 def hod_students():
     if session.get("role") != "HOD":
         return redirect("/login")
-    
-    hod = User.query.get(session["user_id"])
-    students = Student.query.filter_by(department_id=hod.department_id).all()
-    return render_template("students.html", students=students)
 
+    students = Student.query.filter_by(
+        department_id=session["department_id"]
+    ).all()
+
+    return render_template(
+        "hod_students.html",
+        students=students
+    )
 
 @app.route("/hod_teachers")
 def hod_teachers():

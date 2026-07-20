@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Student(db.Model):
-    __tablename__ = "students"
+    __tablename__ = "student"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
@@ -67,7 +67,7 @@ class User(db.Model):
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer,db.ForeignKey("students.id"), nullable=False)
+    student_id = db.Column(db.Integer,db.ForeignKey("student.id"), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
     date = db.Column(db.String(20), nullable=False)
@@ -78,7 +78,7 @@ class Attendance(db.Model):
 
 class Mark(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("students.id"), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
     subject = db.Column(db.String(100), nullable=False)
