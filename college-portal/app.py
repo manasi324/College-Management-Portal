@@ -102,6 +102,14 @@ def login():
 
     return render_template("login.html")
 
+@app.route("/logout")
+def logout():
+
+    # Remove all session data
+    session.clear()
+
+    # Redirect to login page
+    return redirect("/login")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -194,6 +202,9 @@ def dashboard():
         return redirect('/login')
 
     student = Student.query.get(session['student_id'])
+
+    print("✅ LOADING dashboard.html")
+
     return render_template('dashboard.html', student=student)
 
 
@@ -221,13 +232,24 @@ def student_events():
     return render_template('events.html', events=events)
 
 
-@app.route('/student/materials')
+
+@app.route("/student_materials")
 def student_materials():
+
     if 'student_id' not in session:
         return redirect('/login')
-    materials = Material.query.all()
-    return render_template('materials.html', materials=materials)
 
+    student = Student.query.get(session['student_id'])
+
+    materials = Material.query.filter_by(
+        department_id=student.department_id
+    ).all()
+
+    return render_template(
+        "student_materials.html",
+        student=student,
+        materials=materials
+    )
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -327,48 +349,78 @@ def edit_student(id):
 
 @app.route('/manage_notices', methods=['GET', 'POST'])
 def manage_notices():
-    if session.get("role") != "Principal":
-        return redirect('/login')
 
-    if request.method == 'POST':
+    if session.get("role") != "Principal":
+        return redirect("/login")
+
+    principal = User.query.get(session["user_id"])
+
+    if request.method == "POST":
+
         notice = Notice(
-            title=request.form['title'],
-            description=request.form['description']
+            title=request.form["title"],
+            description=request.form["description"],
+            scope="College",          # Principal notices are for everyone
+            department_id=None,       # No department
+            created_by=principal.id
         )
+
         db.session.add(notice)
         db.session.commit()
-        return redirect('/manage_notices')
 
-    notices = Notice.query.all()
-    return render_template("manage_notices.html", notices=notices)
+        flash("Notice added successfully!", "success")
+
+        return redirect("/manage_notices")
+
+    notices = Notice.query.filter_by(
+        scope="College"
+    ).all()
+
+    return render_template(
+        "manage_notices.html",
+        notices=notices
+    )
 
 
 @app.route('/edit_notice/<int:id>', methods=['GET', 'POST'])
 def edit_notice(id):
+
     if session.get("role") != "Principal":
         return redirect("/login")
 
     notice = Notice.query.get_or_404(id)
 
     if request.method == "POST":
+
         notice.title = request.form["title"]
         notice.description = request.form["description"]
+
         db.session.commit()
+
+        flash("Notice updated successfully!", "success")
+
         return redirect("/manage_notices")
 
-    return render_template("edit_notice.html", notice=notice)
+    return render_template(
+        "edit_notice.html",
+        notice=notice
+    )
 
 
 @app.route('/delete_notice/<int:id>')
 def delete_notice(id):
+
     if session.get("role") != "Principal":
         return redirect("/login")
 
     notice = Notice.query.get_or_404(id)
+
     db.session.delete(notice)
     db.session.commit()
-    return redirect("/manage_notices")
 
+    flash("Notice deleted successfully!", "success")
+
+    return redirect("/manage_notices")
 
 @app.route('/manage_events', methods=['GET', 'POST'])
 def manage_events():
@@ -682,8 +734,20 @@ def department_notices():
 
 @app.route("/study_materials")
 def study_materials():
-    return "<h2>Study Materials - Coming Soon</h2>"
 
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    materials = Material.query.filter_by(
+        department_id=teacher.department_id
+    ).all()
+
+    return render_template(
+        "study_materials.html",
+        materials=materials
+    )
 @app.route("/department_attendance")
 def department_attendance():
 
@@ -856,13 +920,63 @@ def teacher_students():
     )
 
 
-@app.route("/upload_material")
+@app.route("/upload_material", methods=["GET", "POST"])
 def upload_material():
+
     if session.get("role") != "Teacher":
         return redirect("/login")
 
+    teacher = User.query.get(session["user_id"])
+
+    if request.method == "POST":
+
+        material = Material(
+            subject=request.form["subject"],
+            title=request.form["title"],
+            link=request.form["link"],
+            department_id=teacher.department_id,
+            created_by=teacher.id
+        )
+
+        db.session.add(material)
+        db.session.commit()
+
+        flash("Study Material Uploaded Successfully!", "success")
+
+        return redirect("/study_materials")
+
     return render_template("upload_material.html")
 
+@app.route("/edit_material/<int:id>", methods=["GET", "POST"])
+def edit_material(id):
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    material = Material.query.get_or_404(id)
+
+    # Teacher can edit only their department's materials
+    if material.department_id != teacher.department_id:
+        return "Access Denied", 403
+
+    if request.method == "POST":
+
+        material.subject = request.form["subject"]
+        material.title = request.form["title"]
+        material.link = request.form["link"]
+
+        db.session.commit()
+
+        flash("Material updated successfully!", "success")
+
+        return redirect("/study_materials")
+
+    return render_template(
+        "edit_material.html",
+        material=material
+    )
 
 @app.route("/teacher_notices")
 def teacher_notices():

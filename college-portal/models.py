@@ -21,6 +21,10 @@ class Notice(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     department = db.relationship('Department')
     author = db.relationship('User') 
+    scope = db.Column(
+    db.String(20),
+    default="College"
+)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
