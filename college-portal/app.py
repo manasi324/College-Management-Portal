@@ -533,35 +533,78 @@ def add_teacher():
     return render_template("add_teacher.html", departments=departments)
 
 
-@app.route('/edit_teacher/<int:id>', methods=['GET', 'POST'])
+@app.route("/edit_teacher/<int:id>", methods=["GET", "POST"])
 def edit_teacher(id):
-    if session.get("role") != "Principal":
+
+    if session.get("role") not in ["Principal", "HOD"]:
         return redirect("/login")
-    
+
     teacher = User.query.get_or_404(id)
-    
+
+    # HOD can edit only teachers from their own department
+    if session.get("role") == "HOD":
+        if teacher.department_id != session["department_id"]:
+            return "Access Denied", 403
+
     if request.method == "POST":
         teacher.name = request.form["name"]
         teacher.email = request.form["email"]
         teacher.password = request.form["password"]
-        department = Department.query.filter_by(name=request.form["department"]).first()
+
+        department = Department.query.filter_by(
+            name=request.form["department"]
+        ).first()
+
         teacher.department_id = department.id
+
+        # Also update the teachers table
+        teacher_record = Teacher.query.filter_by(user_id=teacher.id).first()
+        if teacher_record:
+            teacher_record.department_id = department.id
+
         db.session.commit()
-        return redirect("/manage_teachers")
-    
+
+        if session.get("role") == "Principal":
+            return redirect("/manage_teachers")
+        else:
+            return redirect("/hod_teachers")
+
     departments = Department.query.all()
-    return render_template("edit_teacher.html", teacher=teacher, departments=departments)
+
+    return render_template(
+        "edit_teacher.html",
+        teacher=teacher,
+        departments=departments
+    )
 
 
-@app.route('/delete_teacher/<int:id>')
+@app.route("/delete_teacher/<int:id>")
 def delete_teacher(id):
-    if session.get("role") != "Principal":
+
+    if session.get("role") not in ["Principal", "HOD"]:
         return redirect("/login")
-    
+
     teacher = User.query.get_or_404(id)
+
+    # HOD can delete only teachers from their own department
+    if session.get("role") == "HOD":
+        if teacher.department_id != session["department_id"]:
+            return "Access Denied", 403
+
+    # Delete from teachers table first
+    teacher_record = Teacher.query.filter_by(user_id=id).first()
+    if teacher_record:
+        db.session.delete(teacher_record)
+
+    # Delete from users table
     db.session.delete(teacher)
+
     db.session.commit()
-    return redirect("/manage_teachers")
+
+    if session.get("role") == "Principal":
+        return redirect("/manage_teachers")
+    else:
+        return redirect("/hod_teachers")
 
 
 # ==================== HOD DASHBOARD ====================

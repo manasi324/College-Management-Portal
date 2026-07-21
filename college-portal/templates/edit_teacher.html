@@ -15,7 +15,11 @@
         {% endfor %}
         </select>
     <button class="btn btn-primary">Update</button>
+    {% if session.role == "Principal" %}
     <a href="{{ url_for('manage_teachers') }}" class="btn btn-secondary">Cancel</a>
+{% else %}
+    <a href="{{ url_for('hod_teachers') }}" class="btn btn-secondary">Cancel</a>
+{% endif %}
 </form>
 </div>
 </body>
