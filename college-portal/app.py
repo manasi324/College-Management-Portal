@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from config import Config
 from models import db, Student, User, Department, Teacher, HOD, Notice, Event, Material, Attendance, Mark
-
-
+from datetime import date
+from flask import flash
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = "collegeportal"
@@ -684,11 +684,122 @@ def department_notices():
 def study_materials():
     return "<h2>Study Materials - Coming Soon</h2>"
 
+@app.route("/department_attendance")
+def department_attendance():
 
-@app.route("/attendance")
-def attendance():
-    return "<h2>Attendance - Coming Soon</h2>"
+    if session.get("role") != "HOD":
+        return redirect("/login")
 
+    department_id = session["department_id"]
+
+    students = Student.query.filter_by(
+        department_id=department_id
+    ).all()
+
+    attendance_data = []
+
+    for student in students:
+
+        total = Attendance.query.filter_by(
+            student_id=student.id
+        ).count()
+
+        present = Attendance.query.filter_by(
+            student_id=student.id,
+            status="Present"
+        ).count()
+
+        percentage = 0
+
+        if total > 0:
+            percentage = round((present / total) * 100, 2)
+
+        attendance_data.append({
+            "student": student,
+            "total": total,
+            "present": present,
+            "percentage": percentage
+        })
+
+    # Summary cards
+    total_students = len(attendance_data)
+
+    average_attendance = 0
+    if total_students > 0:
+        average_attendance = round(
+            sum(s["percentage"] for s in attendance_data) / total_students,
+            2
+        )
+
+    below_75 = sum(
+        1 for s in attendance_data
+        if s["percentage"] < 75
+    )
+
+    today = str(date.today())
+
+    today_attendance = Attendance.query.filter_by(
+        department_id=department_id,
+        date=today
+    ).count()
+
+    # Pie chart data
+    present_count = Attendance.query.filter_by(
+        department_id=department_id,
+        status="Present"
+    ).count()
+
+    absent_count = Attendance.query.filter_by(
+        department_id=department_id,
+        status="Absent"
+    ).count()
+
+    return render_template(
+        "department_attendance.html",
+        attendance_data=attendance_data,
+        total_students=total_students,
+        average_attendance=average_attendance,
+        below_75=below_75,
+        today_attendance=today_attendance,
+        present_count=present_count,
+        absent_count=absent_count
+    )
+
+@app.route("/send_warning/<int:student_id>")
+def send_warning(student_id):
+
+    if session.get("role") != "HOD":
+        return redirect("/login")
+
+    student = Student.query.get_or_404(student_id)
+
+    total = Attendance.query.filter_by(
+        student_id=student.id
+    ).count()
+
+    present = Attendance.query.filter_by(
+        student_id=student.id,
+        status="Present"
+    ).count()
+
+    percentage = 0
+
+    if total > 0:
+        percentage = round((present / total) * 100, 2)
+
+    notice = Notice(
+        title="Attendance Warning",
+        description=f"Your attendance is only {percentage}%. Please improve your attendance immediately to avoid disciplinary action.",
+        department_id=student.department_id,
+        created_by=session["user_id"]
+    )
+
+    db.session.add(notice)
+    db.session.commit()
+
+    flash("Warning notice sent successfully!", "success")
+
+    return redirect("/department_attendance")
 
 @app.route("/assignments")
 def assignments():
@@ -729,16 +840,18 @@ def teacher_dashboard():
 
 @app.route("/teacher_students")
 def teacher_students():
+
     if session.get("role") != "Teacher":
         return redirect("/login")
 
     teacher = User.query.get(session["user_id"])
+
     students = Student.query.filter_by(
         department_id=teacher.department_id
     ).all()
 
     return render_template(
-        "teacher_students.html",
+        "hod_students.html",
         students=students
     )
 
@@ -762,6 +875,59 @@ def teacher_notices():
         notices=notices
     )
 
+@app.route("/attendance", methods=["GET", "POST"])
+def attendance():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    students = Student.query.filter_by(
+        department_id=teacher.department_id
+    ).all()
+
+    if request.method == "POST":
+
+        today = str(date.today())
+
+        for student in students:
+
+            status = request.form.get(f"status_{student.id}")
+
+            existing = Attendance.query.filter_by(
+                student_id=student.id,
+                date=today
+            ).first()
+
+            if existing:
+                existing.status = status
+                existing.teacher_id = teacher.id
+                existing.department_id = teacher.department_id
+
+            else:
+                attendance = Attendance(
+                    student_id=student.id,
+                    teacher_id=teacher.id,
+                    department_id=teacher.department_id,
+                    date=today,
+                    status=status
+                )
+
+                db.session.add(attendance)
+
+        db.session.commit()
+
+        flash("Attendance saved successfully!", "success")
+
+        return redirect("/attendance")
+
+    return render_template(
+        "attendance.html",
+        students=students,
+        teacher=teacher,
+        today=date.today()
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

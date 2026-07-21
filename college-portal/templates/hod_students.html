@@ -54,7 +54,19 @@
 
             </table>
 
-            <a href="{{ url_for('hod_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            {% if session["role"] == "HOD" %}
+
+<a href="/hod_dashboard" class="btn btn-secondary">
+    Back to Dashboard
+</a>
+
+{% else %}
+
+<a href="/teacher_dashboard" class="btn btn-secondary">
+    Back to Dashboard
+</a>
+
+{% endif %}
 
         </div>
     </div>
