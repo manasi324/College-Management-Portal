@@ -14,6 +14,7 @@ class Student(db.Model):
     department = db.relationship('Department')
     
 class Notice(db.Model):
+    __tablename__ = "notice"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False) 

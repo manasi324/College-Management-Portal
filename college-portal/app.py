@@ -373,13 +373,13 @@ def manage_notices():
         return redirect("/manage_notices")
 
     notices = Notice.query.filter_by(
-        scope="College"
-    ).all()
+    scope="College"
+).all()
 
     return render_template(
-        "manage_notices.html",
-        notices=notices
-    )
+      "manage_notices.html",
+      notices=notices
+)
 
 
 @app.route('/edit_notice/<int:id>', methods=['GET', 'POST'])
