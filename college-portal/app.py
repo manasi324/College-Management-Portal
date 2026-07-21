@@ -727,10 +727,58 @@ def hod_teachers():
         teachers=teachers
     )
 
-@app.route("/department_notices")
+@app.route("/department_notices", methods=["GET", "POST"])
 def department_notices():
-    return "<h2>Department Notices - Coming Soon</h2>"
 
+    if session.get("role") != "HOD":
+        return redirect("/login")
+
+    hod = User.query.get(session["user_id"])
+
+    if request.method == "POST":
+
+        notice = Notice(
+            title=request.form["title"],
+            description=request.form["description"],
+            scope="Department",
+            department_id=hod.department_id,
+            created_by=hod.id
+        )
+
+        db.session.add(notice)
+        db.session.commit()
+
+        flash("Department notice added successfully!", "success")
+
+        return redirect("/department_notices")
+
+    college_notices = Notice.query.filter_by(
+        scope="College"
+    ).all()
+
+    department_notices = Notice.query.filter_by(
+        scope="Department",
+        department_id=hod.department_id
+    ).all()
+
+    return render_template(
+        "department_notices.html",
+        college_notices=college_notices,
+        department_notices=department_notices
+    )
+
+@app.route("/department_events")
+def department_events():
+
+    if session.get("role") != "HOD":
+        return redirect("/login")
+
+    events = Event.query.all()
+
+    return render_template(
+        "department_events.html",
+        events=events
+    )
 
 @app.route("/study_materials")
 def study_materials():
@@ -978,15 +1026,57 @@ def edit_material(id):
         material=material
     )
 
-@app.route("/teacher_notices")
+@app.route("/teacher_notices", methods=["GET", "POST"])
 def teacher_notices():
+
     if session.get("role") != "Teacher":
         return redirect("/login")
 
-    notices = Notice.query.all()
+    teacher = User.query.get(session["user_id"])
+
+    if request.method == "POST":
+
+        notice = Notice(
+            title=request.form["title"],
+            description=request.form["description"],
+            scope="Department",
+            department_id=teacher.department_id,
+            created_by=teacher.id
+        )
+
+        db.session.add(notice)
+        db.session.commit()
+
+        flash("Notice added successfully!", "success")
+
+        return redirect("/teacher_notices")
+
+    college_notices = Notice.query.filter_by(
+        scope="College"
+    ).all()
+
+    department_notices = Notice.query.filter_by(
+        scope="Department",
+        department_id=teacher.department_id
+    ).all()
+
     return render_template(
         "teacher_notices.html",
-        notices=notices
+        college_notices=college_notices,
+        department_notices=department_notices
+    )
+
+@app.route("/teacher_events")
+def teacher_events():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    events = Event.query.all()
+
+    return render_template(
+        "teacher_events.html",
+        events=events
     )
 
 @app.route("/attendance", methods=["GET", "POST"])
