@@ -53,46 +53,55 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     if request.method == 'POST':
+
         email = request.form['email']
         password = request.form['password']
 
-        # Check Principal / HOD / Teacher
+        # Principal / HOD / Teacher Login
         user = User.query.filter_by(
             email=email,
             password=password
         ).first()
 
         if user:
+
+            print("User found:", user.email, user.role, user.id)
+
             session.clear()
 
+            session["user_id"] = user.id
+            session["role"] = user.role
+            session["department_id"] = user.department_id
+
+            if user.department:
+                session["department"] = user.department.name
+
+            print("Session after login:", dict(session))
+
             if user.role == "Principal":
-                session["role"] = "Principal"
                 return redirect("/principal_dashboard")
 
             elif user.role == "HOD":
-                session["user_id"] = user.id
-                session["role"] = "HOD"
-                session["department"] = user.department.name
-                session["department_id"] = user.department_id
-                return redirect(url_for("hod_dashboard"))
+                return redirect("/hod_dashboard")
 
             elif user.role == "Teacher":
-                session["user_id"] = user.id
-                session["role"] = "Teacher"
-                session["department"] = user.department.name
-                session["department_id"] = user.department_id
                 return redirect("/teacher_dashboard")
 
-        # Check Student Login
+        # Student Login
         student = Student.query.filter_by(
             email=email,
             password=password
         ).first()
 
         if student:
+
             session.clear()
+
             session["student_id"] = student.id
+            session["role"] = "Student"
+
             return redirect("/dashboard")
 
         return render_template(
@@ -104,11 +113,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-
-    # Remove all session data
     session.clear()
-
-    # Redirect to login page
+    flash("Logged out successfully!", "success")
     return redirect("/login")
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -349,7 +355,7 @@ def edit_student(id):
 
 @app.route('/manage_notices', methods=['GET', 'POST'])
 def manage_notices():
-
+    print("Current session:", dict(session))
     if session.get("role") != "Principal":
         return redirect("/login")
 
@@ -764,7 +770,8 @@ def department_notices():
     return render_template(
         "department_notices.html",
         college_notices=college_notices,
-        department_notices=department_notices
+        department_notices=department_notices,
+        role="HOD"
     )
 
 @app.route("/department_events")
@@ -1061,10 +1068,11 @@ def teacher_notices():
     ).all()
 
     return render_template(
-        "teacher_notices.html",
-        college_notices=college_notices,
-        department_notices=department_notices
-    )
+    "department_notices.html",
+    college_notices=college_notices,
+    department_notices=department_notices,
+    role="Teacher"
+)
 
 @app.route("/teacher_events")
 def teacher_events():
