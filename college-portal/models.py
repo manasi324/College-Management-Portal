@@ -47,8 +47,11 @@ class Department(db.Model):
     __tablename__ = "departments"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-
+    name = db.Column(db.String(100), nullable=False)
+    about = db.Column(db.Text)
+    eligibility = db.Column(db.Text)
+    syllabus = db.Column(db.Text)
+    
 class User(db.Model):
     __tablename__ = "users"
 

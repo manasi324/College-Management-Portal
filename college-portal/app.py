@@ -49,6 +49,7 @@ def home():
     return render_template('index.html')
 
 
+
 # ==================== AUTHENTICATION ====================
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1139,6 +1140,28 @@ def attendance():
         students=students,
         teacher=teacher,
         today=date.today()
+    )
+
+# ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
+@app.route("/department/<int:id>")
+def department_details(id):
+
+    department = Department.query.get_or_404(id)
+
+    teachers = User.query.filter(
+        User.department_id == id,
+        User.role.in_(["Teacher", "HOD"])
+    ).all()
+
+    materials = Material.query.filter_by(
+        department_id=id
+    ).all()
+
+    return render_template(
+        "department_details.html",
+        department=department,
+        teachers=teachers,
+        materials=materials,
     )
 
 if __name__ == '__main__':
