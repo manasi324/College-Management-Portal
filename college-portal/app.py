@@ -44,9 +44,25 @@ with app.app_context():
 
 # ==================== HOME ====================
 
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
+
+    departments = Department.query.all()
+
+    principal_notices = Notice.query.filter_by(
+        scope="College"
+    ).order_by(Notice.id.desc()).all()
+
+    events = Event.query.order_by(
+        Event.id.desc()
+    ).all()
+
+    return render_template(
+        "index.html",
+        departments=departments,
+        principal_notices=principal_notices,
+        events=events
+    )
 
 
 

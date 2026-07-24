@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Royal College Management Portal</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Font Awesome -->
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
 
@@ -156,15 +159,345 @@
 
         }
 
-    .department-card{
+.department-card{
     transition:.3s;
     border:none;
     border-radius:18px;
+    padding:30px;
+    min-height:320px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
+
 
 .department-card:hover{
     transform:translateY(-8px);
     box-shadow:0 15px 30px rgba(0,0,0,.18);
+}
+
+.announcement-box{
+
+    background:#fff;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    height:350px;
+
+    overflow:hidden;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+.announcement-card{
+
+    border-left:5px solid #0d6efd;
+
+    padding:15px;
+
+    margin-bottom:20px;
+
+    background:#f8f9fa;
+
+    border-radius:10px;
+
+}
+
+.announcement-card h5{
+
+    color:#003366;
+
+    font-weight:600;
+
+}
+
+.announcement-card:hover{
+
+    transform:translateY(-3px);
+
+    transition:.3s;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+
+}
+
+.facility-card{
+
+    border:none;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    transition:.4s;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}
+
+.facility-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
+
+}
+
+.facility-img{
+
+    height:220px;
+
+    object-fit:cover;
+
+}
+
+.facility-card h4{
+
+    color:#003366;
+
+    font-weight:bold;
+
+    margin-bottom:15px;
+
+}
+
+.facility-card p{
+
+    color:#666;
+
+    line-height:1.7;
+
+}
+
+#why-choose{
+
+    background:#f8fbff;
+
+}
+
+.feature-box{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:30px 20px;
+
+    text-align:center;
+
+    height:100%;
+
+    transition:.4s;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}
+
+.feature-box:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
+
+}
+
+.feature-icon{
+
+    font-size:50px;
+
+    color:#0d6efd;
+
+    margin-bottom:20px;
+
+}
+
+.feature-box h5{
+
+    color:#003366;
+
+    font-weight:bold;
+
+    margin-bottom:15px;
+
+}
+
+.feature-box p{
+
+    color:#666;
+
+    line-height:1.7;
+
+}
+
+.contact-box{
+
+    background:white;
+
+    padding:35px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+    height:100%;
+
+}
+
+.contact-box h3{
+
+    color:#003366;
+
+    font-weight:bold;
+
+}
+
+.contact-box p{
+
+    font-size:17px;
+
+    margin-bottom:18px;
+
+    line-height:1.8;
+
+}
+
+.contact-box i{
+
+    font-size:20px;
+
+    margin-right:10px;
+
+}
+
+.contact-box input,
+.contact-box textarea{
+
+    border-radius:10px;
+
+}
+
+.contact-box button{
+
+    border-radius:10px;
+
+    padding:10px 30px;
+
+}
+
+.footer{
+
+    background:#002147;
+
+    color:white;
+
+    padding:50px 0 20px;
+
+}
+
+.footer h4{
+
+    margin-bottom:20px;
+
+}
+
+.footer ul{
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+.footer ul li{
+
+    margin-bottom:10px;
+
+}
+
+.footer ul li a{
+
+    color:white;
+
+    text-decoration:none;
+
+}
+
+.footer ul li a:hover{
+
+    color:#ffc107;
+
+}
+
+.social-icon{
+
+    font-size:28px;
+
+    margin-right:15px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.social-icon:hover{
+
+    color:#ffc107;
+
+}
+
+.notice-container{
+    height:350px;
+    overflow:hidden;
+    position:relative;
+}
+
+.notice-scroll{
+    animation:scrollNotice 20s linear infinite;
+}
+
+.notice-container:hover .notice-scroll{
+    animation-play-state:paused;
+}
+
+@keyframes scrollNotice{
+
+    0%{
+        transform:translateY(0%);
+    }
+
+    100%{
+        transform:translateY(-50%);
+    }
+
+}
+
+.notice-card{
+
+    background:white;
+    border-left:5px solid #0d6efd;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+}
+
+.notice-card h5{
+
+    color:#003366;
+    font-weight:600;
+
+}
+
+.notice-date{
+
+    font-size:14px;
+    color:#777;
+
 }
 
     </style>
@@ -238,9 +571,17 @@ Login
 
 <div>
 
+<span class="badge bg-warning text-dark fs-6 px-3 py-2 mb-3">
+🎓 Admissions Open 2026–27
+</span>
+
 <h1>Royal College Management Portal</h1>
 
 <p>Empowering Education Through Innovation & Excellence</p>
+
+<p class="lead">
+Affiliated to the University of Mumbai | NAAC Accredited | Established 1998
+</p>
 
 <a href="{{ url_for('login') }}"
 class="btn btn-warning btn-custom">
@@ -329,11 +670,29 @@ successful careers and responsible citizenship.
             <div class="card p-4 text-center h-100 shadow-sm department-card">
                 <i class="fa-solid fa-computer fa-3x text-primary"></i>
 
-                <h4 class="mt-3 text-dark">BSc CS & IT</h4>
+                <h4 class="mt-3 text-dark">
+                      BSc CS & IT
+                </h4>
 
-                <p class="text-muted">
-                    Computer Science and Information Technology
-                </p>
+             <p class="text-muted mb-2">
+                Computer Science & Information Technology
+              </p>
+
+<p class="small text-secondary mb-1">
+    <i class="fa-solid fa-clock"></i>
+    Duration: 3 Years
+</p>
+
+<p class="small text-secondary">
+    <i class="fa-solid fa-graduation-cap"></i>
+    Degree: B.Sc.
+</p>
+
+<div class="mt-3">
+    <span class="btn btn-primary rounded-pill px-4">
+        View Course
+    </span>
+</div>
             </div>
         </a>
     </div>
@@ -345,11 +704,29 @@ successful careers and responsible citizenship.
             <div class="card p-4 text-center h-100 shadow-sm department-card">
                 <i class="fa-solid fa-chart-line fa-3x text-success"></i>
 
-                <h4 class="mt-3 text-dark">BMS</h4>
+               <h4 class="mt-3 text-dark">
+   BMS
+</h4>
 
-                <p class="text-muted">
-                    Bachelor of Management Studies
-                </p>
+<p class="text-muted mb-2">
+    Bachelor of Management Studies
+</p>
+
+<p class="small text-secondary mb-1">
+    <i class="fa-solid fa-clock"></i>
+    Duration: 3 Years
+</p>
+
+<p class="small text-secondary">
+    <i class="fa-solid fa-graduation-cap"></i>
+    Degree:BMS
+</p>
+
+<div class="mt-3">
+    <span class="btn btn-primary rounded-pill px-4">
+        View Course
+    </span>
+</div>
             </div>
         </a>
     </div>
@@ -361,11 +738,29 @@ successful careers and responsible citizenship.
             <div class="card p-4 text-center h-100 shadow-sm department-card">
                 <i class="fa-solid fa-coins fa-3x text-warning"></i>
 
-                <h4 class="mt-3 text-dark">BCOM</h4>
+               <h4 class="mt-3 text-dark">
+     BCOM
+</h4>
 
-                <p class="text-muted">
-                    Bachelor of Commerce
-                </p>
+<p class="text-muted mb-2">
+    Bachelor of Commerce
+</p>
+
+<p class="small text-secondary mb-1">
+    <i class="fa-solid fa-clock"></i>
+    Duration: 3 Years
+</p>
+
+<p class="small text-secondary">
+    <i class="fa-solid fa-graduation-cap"></i>
+    Degree:  BCOM
+</p>
+
+<div class="mt-3">
+    <span class="btn btn-primary rounded-pill px-4">
+        View Course
+    </span>
+</div>
             </div>
         </a>
     </div>
@@ -377,11 +772,29 @@ successful careers and responsible citizenship.
             <div class="card p-4 text-center h-100 shadow-sm department-card">
                 <i class="fa-solid fa-camera fa-3x text-danger"></i>
 
-                <h4 class="mt-3 text-dark">BAMMC</h4>
+              <h4 class="mt-3 text-dark">
+    BAMMC
+</h4>
 
-                <p class="text-muted">
-                    Mass Media & Communication
-                </p>
+<p class="text-muted mb-2">
+      Mass Media & Communication
+</p>
+
+<p class="small text-secondary mb-1">
+    <i class="fa-solid fa-clock"></i>
+    Duration: 3 Years
+</p>
+
+<p class="small text-secondary">
+    <i class="fa-solid fa-graduation-cap"></i>
+    Degree:BAMMC
+</p>
+
+<div class="mt-3">
+    <span class="btn btn-primary rounded-pill px-4">
+        View Course
+    </span>
+</div>
             </div>
         </a>
     </div>
@@ -392,12 +805,29 @@ successful careers and responsible citizenship.
         class="text-decoration-none text-dark">
             <div class="card p-4 text-center h-100 shadow-sm department-card">
                 <i class="fa-solid fa-calculator fa-3x text-info"></i>
+<h4 class="mt-3 text-dark">
+     BAF
+</h4>
 
-                <h4 class="mt-3 text-dark">BAF</h4>
+<p class="text-muted mb-2">
+    Accounting & Finance
+</p>
 
-                <p class="text-muted">
-                    Accounting & Finance
-                </p>
+<p class="small text-secondary mb-1">
+    <i class="fa-solid fa-clock"></i>
+    Duration: 3 Years
+</p>
+
+<p class="small text-secondary">
+    <i class="fa-solid fa-graduation-cap"></i>
+    Degree:  BAF
+</p>
+
+<div class="mt-3">
+    <span class="btn btn-primary rounded-pill px-4">
+        View Course
+    </span>
+</div>
             </div>
         </a>
     </div>
@@ -408,11 +838,8 @@ successful careers and responsible citizenship.
 
 </section>
 
-
-
- <!-- Statistics -->
-
- <section class="stats">
+<!--Statistics Section-->
+<section class="stats py-5">
 
 <div class="container">
 
@@ -438,7 +865,7 @@ successful careers and responsible citizenship.
 
 <h2>25+</h2>
 
-<p>Courses</p>
+<p>Years Experience</p>
 
 </div>
 
@@ -454,106 +881,559 @@ successful careers and responsible citizenship.
 
 </div>
 
- </section>
-
- <!--Facilities -->
- <section class="py-5 bg-light">
-    <div class="container">
-
-        <h2 class="text-center mb-5">Our Facilities</h2>
-
-        <div class="row g-4">
-
-            <div class="col-md-4">
-                <div class="card shadow p-4 text-center h-100">
-                    <i class="fas fa-book fa-3x text-primary mb-3"></i>
-                    <h4>Library</h4>
-                    <p>Modern library with thousands of books and digital resources.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card shadow p-4 text-center h-100">
-                    <i class="fas fa-desktop fa-3x text-success mb-3"></i>
-                    <h4>Computer Lab</h4>
-                    <p>High-performance computers with high-speed internet.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card shadow p-4 text-center h-100">
-                    <i class="fas fa-flask fa-3x text-danger mb-3"></i>
-                    <h4>Science Lab</h4>
-                    <p>Well-equipped laboratories for practical learning.</p>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
- </section>
-
- <!-- Notices and Events -->
- <section id="events" class="container my-5">
-    <div class="row">
-
-        <div class="col-md-6">
-            <h2>Latest Notices</h2>
-
-            {% for notice in notices %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5>{{ notice.title }}</h5>
-                    <p>{{ notice.description }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="col-md-6">
-            <h2>Upcoming Events</h2>
-
-            {% for event in events %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5>{{ event.title }}</h5>
-                    <p>{{ event.date }}</p>
-                    <p>{{ event.description }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-    </div>
 </section>
 
-  <!--gallery-->
- <section class="py-5">
-    <div class="container">
+<!-- Facilities & Campus Life -->
 
-        <h2 class="text-center mb-5">Campus Gallery</h2>
+<section id="facilities" class="py-5 bg-light">
 
-        <div class="row">
+<div class="container">
 
-            <div class="col-md-4 mb-4">
-                <img src="{{ url_for('static', filename='images/campus1.jpg') }}"
-                     class="img-fluid rounded shadow">
-            </div>
+<h2 class="section-title text-center mb-5">
+    Campus Life & Facilities
+</h2>
 
-            <div class="col-md-4 mb-4">
-                <img src="{{ url_for('static', filename='images/campus2.jpg') }}"
-                     class="img-fluid rounded shadow">
-            </div>
+<div class="row g-4">
 
-            <div class="col-md-4 mb-4">
-                <img src="{{ url_for('static', filename='images/library.jpg') }}"
-                     class="img-fluid rounded shadow">
+    <!-- Computer Lab -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/computer_lab.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>💻 Computer Laboratory</h4>
+
+                <p>
+                    Modern laboratories equipped with high-performance
+                    computers, programming software, and high-speed internet.
+                </p>
+
             </div>
 
         </div>
 
     </div>
- </section>
+
+    <!-- Library -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/library.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>📚 Library</h4>
+
+                <p>
+                    A well-stocked library offering textbooks, journals,
+                    research materials, and digital resources.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Seminar Hall -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/seminar.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>🎤 Seminar Hall</h4>
+
+                <p>
+                    Spacious seminar halls for workshops, guest lectures,
+                    presentations, and technical events.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Cultural Activities -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/cultural.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>🎭 Cultural Activities</h4>
+
+                <p>
+                    Students actively participate in annual festivals,
+                    competitions, and cultural programs.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Sports -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/sports.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>🏏 Sports Facilities</h4>
+
+                <p>
+                    Indoor and outdoor sports activities promoting teamwork,
+                    fitness, and overall development.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Smart Classroom -->
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card facility-card h-100">
+
+            <img src="{{ url_for('static', filename='images/classroom.jpg') }}"
+                 class="card-img-top facility-img">
+
+            <div class="card-body">
+
+                <h4>🖥 Smart Classrooms</h4>
+
+                <p>
+                    Technology-enabled classrooms with projectors, Wi-Fi,
+                    and interactive learning facilities.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+ <!-- Why Choose Royal College -->
+
+<section id="why-choose" class="py-5">
+
+<div class="container">
+
+<h2 class="section-title text-center mb-5">
+
+Why Choose Royal College?
+
+</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-mortarboard-fill feature-icon"></i>
+
+            <h5>Experienced Faculty</h5>
+
+            <p>
+                Learn from qualified professors and industry experts
+                dedicated to academic excellence.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-laptop feature-icon"></i>
+
+            <h5>Modern Laboratories</h5>
+
+            <p>
+                Well-equipped computer labs with updated software and
+                high-speed internet access.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-book-half feature-icon"></i>
+
+            <h5>Digital Library</h5>
+
+            <p>
+                Access books, journals, research papers, and online
+                learning resources anytime.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-briefcase-fill feature-icon"></i>
+
+            <h5>Placement Support</h5>
+
+            <p>
+                Career guidance, internships, workshops, and campus
+                recruitment opportunities.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-wifi feature-icon"></i>
+
+            <h5>Wi-Fi Campus</h5>
+
+            <p>
+                High-speed internet connectivity throughout the campus
+                for seamless learning.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-trophy-fill feature-icon"></i>
+
+            <h5>Sports Activities</h5>
+
+            <p>
+                Indoor and outdoor sports facilities promoting teamwork,
+                leadership, and fitness.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-people-fill feature-icon"></i>
+
+            <h5>Student Clubs</h5>
+
+            <p>
+                Participate in technical clubs, cultural committees,
+                NSS, and various student organizations.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+
+        <div class="feature-box">
+
+            <i class="bi bi-award-fill feature-icon"></i>
+
+            <h5>Quality Education</h5>
+
+            <p>
+                Industry-oriented curriculum designed to prepare students
+                for higher education and successful careers.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- Contact Us -->
+
+<section id="contact" class="py-5 bg-light">
+
+<div class="container">
+
+<h2 class="section-title text-center mb-5">
+
+Contact Us
+
+</h2>
+
+<div class="row">
+
+    <!-- Contact Information -->
+
+    <div class="col-lg-5">
+
+        <div class="contact-box">
+
+            <h3>Royal College</h3>
+
+            <hr>
+
+            <p>
+                <i class="bi bi-geo-alt-fill text-primary"></i>
+
+                Royal College Campus,
+                Mira Road (East),
+                Thane, Maharashtra.
+            </p>
+
+            <p>
+                <i class="bi bi-telephone-fill text-success"></i>
+
+                +91 98765 43210
+            </p>
+
+            <p>
+                <i class="bi bi-envelope-fill text-danger"></i>
+
+                info@royalcollege.edu.in
+            </p>
+
+            <p>
+                <i class="bi bi-clock-fill text-warning"></i>
+
+                Monday - Saturday
+                <br>
+                8:00 AM – 5:00 PM
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Contact Form -->
+
+    <div class="col-lg-7">
+
+        <div class="contact-box">
+
+            <form>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Your Name">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <input type="email"
+                               class="form-control"
+                               placeholder="Email">
+
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Subject">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <textarea
+                        rows="5"
+                        class="form-control"
+                        placeholder="Your Message"></textarea>
+
+                </div>
+
+                <button class="btn btn-primary">
+
+                    Send Message
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+<!--Notices and Events -->
+ <section class="container my-5">
+
+<div class="row">
+    <!-- Latest Notices -->    
+    <div class="col-lg-6">
+
+        <h2 class="mb-4 text-primary">
+            📢 Latest Announcements
+        </h2>
+
+<div class="announcement-box">
+
+<div class="notice-container">
+
+<div class="notice-scroll">
+
+{% for notice in principal_notices %}
+
+<div class="notice-card">
+
+<h5>
+📢 {{ notice.title }}
+</h5>
+
+<p>
+{{ notice.description }}
+</p>
+
+<div class="notice-date">
+
+Principal Office
+
+{% if notice.created_at %}
+• {{ notice.created_at.strftime("%d %b %Y") }}
+{% endif %}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<!-- duplicate for infinite scrolling -->
+
+{% for notice in principal_notices %}
+
+<div class="notice-card">
+
+<h5>
+📢 {{ notice.title }}
+</h5>
+
+<p>
+{{ notice.description }}
+</p>
+
+<div class="notice-date">
+
+Principal Office
+
+{% if notice.created_at %}
+• {{ notice.created_at.strftime("%d %b %Y") }}
+{% endif %}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</div>
+    </div>
+
+    <!-- Upcoming Events -->
+
+    <div class="col-lg-6">
+
+        <h2 class="mb-4 text-success">
+            🎉 Upcoming Events
+        </h2>
+
+        <div class="notice-card">
+
+            {% for event in events %}
+
+            <div class="announcement-card">
+
+                <h5>{{ event.title }}</h5>
+
+                <p>{{ event.description }}</p>
+
+                <small class="text-muted">
+
+                    {{ event.date }}
+
+                </small>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+   
 
  <!--Placement Partners-->
  <section class="py-5 bg-light">
@@ -575,34 +1455,72 @@ successful careers and responsible citizenship.
     </div>
  </section>
 
- <!-- Contact -->
-<section id="contact" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center">Contact Us</h2>
-
-        <p><strong>Address:</strong> Royal College, Mumbai</p>
-        <p><strong>Phone:</strong> +91 9876543210</p>
-        <p><strong>Email:</strong> info@royalcollege.edu</p>
-    </div>
-</section>
-
  <!-- Footer -->
 
- <footer>
+ <footer class="footer">
+
+<div class="container">
+
+<div class="row">
+
+<div class="col-lg-4">
+
+<h4>Royal College</h4>
 
 <p>
 
-© 2026 Royal College Management Portal
+Providing quality education with academic excellence,
+innovation, and holistic student development.
 
 </p>
 
-<p>
+</div>
 
-Designed by Royal College Development Team
+<div class="col-lg-4">
 
-</p>
+<h4>Quick Links</h4>
 
- </footer>
+<ul>
+
+<li><a href="#">Home</a></li>
+
+<li><a href="#departments">Departments</a></li>
+
+<li><a href="#facilities">Facilities</a></li>
+
+<li><a href="#contact">Contact</a></li>
+
+</ul>
+
+</div>
+
+<div class="col-lg-4">
+
+<h4>Follow Us</h4>
+
+<i class="bi bi-facebook social-icon"></i>
+
+<i class="bi bi-instagram social-icon"></i>
+
+<i class="bi bi-twitter-x social-icon"></i>
+
+<i class="bi bi-youtube social-icon"></i>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="text-center">
+
+© 2026 Royal College | All Rights Reserved
+
+</div>
+
+</div>
+
+</footer>
 
  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
