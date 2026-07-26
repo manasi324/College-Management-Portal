@@ -416,16 +416,12 @@ Eligibility
 
 </div>
 
-<!-- STUDY MATERIAL -->
-
 <!-- STUDY MATERIALS -->
 
 <div class="content-card" id="materials">
 
 <h3 class="section-heading">
-
 📄 Study Materials
-
 </h3>
 
 {% if materials %}
@@ -437,9 +433,7 @@ Eligibility
 <tr>
 
 <th>Title</th>
-
-<th>Description</th>
-
+<th>Subject</th>
 <th>Action</th>
 
 </tr>
@@ -452,69 +446,48 @@ Eligibility
 
 <tr>
 
-<td>
+    <td>
+        <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+        {{ material.title }}
+    </td>
 
-<i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+    <td>
+        {{ material.subject }}
+    </td>
 
-{{ material.title }}
+    <td>
 
-</td>
+        <a href="{{ material.link }}"
+           target="_blank"
+           class="btn btn-primary btn-sm">
+            <i class="bi bi-eye"></i>
+            View
+        </a>
 
-<td>
+        <a href="{{ url_for('download_material', id=material.id) }}"
+           class="btn btn-success btn-sm">
+            <i class="bi bi-download"></i>
+            Download
+        </a>
 
-{{ material.description }}
-
-</td>
-
-<td>
-
-{% if session.get("student_id") %}
-
-<a href="/download_material/{{ material.id }}"
-class="btn btn-success btn-sm">
-
-<i class="bi bi-download"></i>
-
-Download
-
-</a>
-
-{% else %}
-
-<a href="{{ material.file_path }}"
-target="_blank"
-class="btn btn-primary btn-sm">
-
-<i class="bi bi-eye"></i>
-
-View
-
-</a>
-
-{% endif %}
-
-</td>
+    </td>
 
 </tr>
 
 {% endfor %}
 
 </tbody>
-
 </table>
 
 {% else %}
 
 <div class="alert alert-info">
-
 No study materials uploaded yet.
-
 </div>
 
 {% endif %}
 
 </div>
-
 </body>
 
 </html>

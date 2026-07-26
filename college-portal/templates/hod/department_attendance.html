@@ -177,48 +177,36 @@
     </a>
 
 </div>
+<p>Present: {{ present_count }}</p>
+<p>Absent: {{ absent_count }}</p>
 <script>
+  const ctx = document.getElementById("pieChart");
 
-new Chart(document.getElementById("pieChart"), {
-
-    type: "doughnut",
-
+new Chart(ctx, {
+    type: "pie",
     data: {
-
         labels: ["Present", "Absent"],
-
         datasets: [{
-
             data: [
-                {{ present_count }}
+                {{ present_count }},
                 {{ absent_count }}
             ],
-
             backgroundColor: [
                 "#28a745",
                 "#dc3545"
-            ]
-
+            ],
+            borderWidth: 2
         }]
-
     },
-
     options: {
-
         responsive: true,
-
         plugins: {
-
             legend: {
                 position: "bottom"
             }
-
         }
-
     }
-
 });
-
 </script>
 </body>
 </html>

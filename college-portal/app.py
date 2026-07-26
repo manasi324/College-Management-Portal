@@ -58,7 +58,7 @@ def home():
     ).all()
 
     return render_template(
-        "index.html",
+        "public/index.html",
         departments=departments,
         principal_notices=principal_notices,
         events=events
@@ -122,11 +122,11 @@ def login():
             return redirect("/dashboard")
 
         return render_template(
-            "login.html",
+            "public/login.html",
             error="Invalid Email or Password"
         )
 
-    return render_template("login.html")
+    return render_template("public/login.html")
 
 @app.route("/logout")
 def logout():
@@ -214,7 +214,7 @@ def register():
         return redirect('/login')
 
     departments = Department.query.all()
-    return render_template('register.html', departments=departments)
+    return render_template('public/register.html', departments=departments)
 
 
 # ==================== STUDENT ROUTES ====================
@@ -228,7 +228,7 @@ def dashboard():
 
     print("✅ LOADING dashboard.html")
 
-    return render_template('dashboard.html', student=student)
+    return render_template('student/dashboard.html', student=student)
 
 
 @app.route('/profile')
@@ -236,7 +236,7 @@ def profile():
     if 'student_id' not in session:
         return redirect('/login')
     student = Student.query.get(session['student_id'])
-    return render_template('profile.html', student=student)
+    return render_template('student/profile.html', student=student)
 
 
 @app.route('/student/notices')
@@ -244,7 +244,7 @@ def student_notices():
     if 'student_id' not in session:
         return redirect('/login')
     notices = Notice.query.all()
-    return render_template('notices.html', notices=notices)
+    return render_template('public/notices.html', notices=notices)
 
 
 @app.route('/student/events')
@@ -252,7 +252,7 @@ def student_events():
     if 'student_id' not in session:
         return redirect('/login')
     events = Event.query.all()
-    return render_template('events.html', events=events)
+    return render_template('public/events.html', events=events)
 
 
 
@@ -269,7 +269,7 @@ def student_materials():
     ).all()
 
     return render_template(
-        "student_materials.html",
+        "student/student_materials.html",
         student=student,
         materials=materials
     )
@@ -286,7 +286,7 @@ def edit_profile():
         db.session.commit()
         return redirect('/profile')
 
-    return render_template('edit_profile.html', student=student)
+    return render_template('student/edit_profile.html', student=student)
 
 
 # ==================== PRINCIPAL ROUTES ====================
@@ -295,7 +295,7 @@ def edit_profile():
 def principal_dashboard():
     if session.get("role") != "Principal":
         return redirect("/login")
-    return render_template('principal_dashboard.html')
+    return render_template('principal/principal_dashboard.html')
 
 
 @app.route('/students')
@@ -303,7 +303,7 @@ def students():
     if session.get("role") != "Principal":
         return redirect("/login")
     students_list = Student.query.all()
-    return render_template('students.html', students=students_list)
+    return render_template('principal/students.html', students=students_list)
 
 
 @app.route('/delete_student/<int:id>')
@@ -364,7 +364,7 @@ def edit_student(id):
       back_url = url_for("hod_students")
 
     return render_template(
-    "edit_student.html",
+    "principal/edit_student.html",
     student=student,
     back_url=back_url
 )
@@ -400,7 +400,7 @@ def manage_notices():
 ).all()
 
     return render_template(
-      "manage_notices.html",
+      "principal/manage_notices.html",
       notices=notices
 )
 
@@ -425,7 +425,7 @@ def edit_notice(id):
         return redirect("/manage_notices")
 
     return render_template(
-        "edit_notice.html",
+        "principal/edit_notice.html",
         notice=notice
     )
 
@@ -461,7 +461,7 @@ def manage_events():
         return redirect('/manage_events')
 
     events = Event.query.all()
-    return render_template('manage_events.html', events=events)
+    return render_template('principal/manage_events.html', events=events)
 
 
 @app.route('/edit_event/<int:id>', methods=['GET', 'POST'])
@@ -478,7 +478,7 @@ def edit_event(id):
         db.session.commit()
         return redirect("/manage_events")
 
-    return render_template("edit_event.html", event=event)
+    return render_template("principal/edit_event.html", event=event)
 
 
 @app.route('/delete_event/<int:id>')
@@ -491,33 +491,13 @@ def delete_event(id):
     db.session.commit()
     return redirect("/manage_events")
 
-
-@app.route('/manage_materials', methods=['GET', 'POST'])
-def manage_materials():
-    if session.get("role") != "Principal":
-        return redirect("/login")
-
-    if request.method == 'POST':
-        material = Material(
-            subject=request.form['subject'],
-            title=request.form['title'],
-            link=request.form['link']
-        )
-        db.session.add(material)
-        db.session.commit()
-        return redirect('/manage_materials')
-
-    materials = Material.query.all()
-    return render_template('manage_materials.html', materials=materials)
-
-
 @app.route('/manage_hods')
 def manage_hods():
     if session.get("role") != "Principal":
         return redirect('/login')
 
     hods = User.query.filter_by(role="HOD").all()
-    return render_template('manage_hods.html', hods=hods)
+    return render_template('principal/manage_hods.html', hods=hods)
 
 
 @app.route('/add_hod', methods=['GET', 'POST'])
@@ -539,7 +519,7 @@ def add_hod():
         return redirect("/manage_hods")
     
     departments = Department.query.all()
-    return render_template("add_hod.html", departments=departments)
+    return render_template("principal/add_hod.html", departments=departments)
 
 
 @app.route('/edit_hod/<int:id>', methods=['GET', 'POST'])
@@ -559,7 +539,7 @@ def edit_hod(id):
         return redirect("/manage_hods")
     
     departments = Department.query.all()
-    return render_template("edit_hod.html", hod=hod, departments=departments)
+    return render_template("principal/edit_hod.html", hod=hod, departments=departments)
 
 
 @app.route('/delete_hod/<int:id>')
@@ -579,7 +559,7 @@ def manage_teachers():
         return redirect("/login")
 
     teachers = User.query.filter_by(role="Teacher").all()
-    return render_template("manage_teachers.html", teachers=teachers)
+    return render_template("principal/manage_teachers.html", teachers=teachers)
 
 
 @app.route('/add_teacher', methods=['GET', 'POST'])
@@ -605,7 +585,7 @@ def add_teacher():
         return redirect("/manage_teachers")
 
     departments = Department.query.all()
-    return render_template("add_teacher.html", departments=departments)
+    return render_template("principal/add_teacher.html", departments=departments)
 
 
 @app.route("/edit_teacher/<int:id>", methods=["GET", "POST"])
@@ -647,7 +627,7 @@ def edit_teacher(id):
     departments = Department.query.all()
 
     return render_template(
-        "edit_teacher.html",
+        "principal/edit_teacher.html",
         teacher=teacher,
         departments=departments
     )
@@ -686,15 +666,11 @@ def delete_teacher(id):
 
 @app.route("/hod_dashboard")
 def hod_dashboard():
+
     if session.get("role") != "HOD":
         return redirect("/login")
 
     hod = User.query.get(session["user_id"])
-      
-    return render_template(
-        "hod_dashboard.html",
-        hod=hod
-    )
 
     total_students = Student.query.filter_by(
         department_id=hod.department_id
@@ -705,18 +681,22 @@ def hod_dashboard():
         department_id=hod.department_id
     ).count()
 
-    total_notices = Notice.query.count()
-    total_materials = Material.query.count()
+    total_notices = Notice.query.filter_by(
+        department_id=hod.department_id
+    ).count()
+
+    total_materials = Material.query.filter_by(
+        department_id=hod.department_id
+    ).count()
 
     return render_template(
-        "hod_dashboard.html",
+        "hod/hod_dashboard.html",
         hod=hod,
         total_students=total_students,
         total_teachers=total_teachers,
         total_notices=total_notices,
         total_materials=total_materials
     )
-
 
 @app.route("/hod_students")
 def hod_students():
@@ -728,7 +708,7 @@ def hod_students():
     ).all()
 
     return render_template(
-        "hod_students.html",
+        "hod/hod_students.html",
         students=students
     )
 
@@ -746,7 +726,7 @@ def hod_teachers():
     )
 
     return render_template(
-        "hod_teachers.html",
+        "hod/hod_teachers.html",
         teachers=teachers
     )
 
@@ -785,7 +765,7 @@ def department_notices():
     ).all()
 
     return render_template(
-        "department_notices.html",
+        "hod/department_notices.html",
         college_notices=college_notices,
         department_notices=department_notices,
         role="HOD"
@@ -800,10 +780,78 @@ def department_events():
     events = Event.query.all()
 
     return render_template(
-        "department_events.html",
+        "public/events.html",
         events=events
     )
 
+@app.route('/edit_department_notice/<int:id>', methods=['GET', 'POST'])
+def edit_department_notice(id):
+    print("SESSION:", dict(session))
+
+    if session.get("role") not in ["Teacher", "HOD"]:
+        return redirect("/login")
+
+    user = User.query.get(session["user_id"])
+
+    notice = Notice.query.get_or_404(id)
+
+    # Security check
+    if notice.scope != "Department" or notice.department_id != user.department_id:
+        flash("You are not authorized to edit this notice.", "danger")
+
+        if session["role"] == "Teacher":
+            return redirect("/teacher_notices")
+        else:
+            return redirect("/department_notices")
+
+    if request.method == "POST":
+
+        notice.title = request.form["title"]
+        notice.description = request.form["description"]
+
+        db.session.commit()
+
+        flash("Notice updated successfully!", "success")
+
+        if session["role"] == "Teacher":
+            return redirect("/teacher_notices")
+        else:
+            return redirect("/department_notices")
+
+    return render_template(
+        "hod/edit_notice.html",
+        notice=notice
+    )
+
+@app.route('/delete_department_notice/<int:id>')
+def delete_department_notice(id):
+
+    if session.get("role") not in ["Teacher", "HOD"]:
+        return redirect("/login")
+
+    user = User.query.get(session["user_id"])
+
+    notice = Notice.query.get_or_404(id)
+
+    # Security check
+    if notice.scope != "Department" or notice.department_id != user.department_id:
+        flash("You are not authorized to delete this notice.", "danger")
+
+        if session["role"] == "Teacher":
+            return redirect("/teacher_notices")
+        else:
+            return redirect("/department_notices")
+
+    db.session.delete(notice)
+    db.session.commit()
+
+    flash("Notice deleted successfully!", "success")
+
+    if session["role"] == "Teacher":
+        return redirect("/teacher_notices")
+    else:
+        return redirect("/department_notices")
+    
 @app.route("/study_materials")
 def study_materials():
 
@@ -817,7 +865,7 @@ def study_materials():
     ).all()
 
     return render_template(
-        "study_materials.html",
+        "teacher/study_materials.html",
         materials=materials
     )
 @app.route("/department_attendance")
@@ -891,7 +939,7 @@ def department_attendance():
     ).count()
 
     return render_template(
-        "department_attendance.html",
+        "hod/department_attendance.html",
         attendance_data=attendance_data,
         total_students=total_students,
         average_attendance=average_attendance,
@@ -965,7 +1013,7 @@ def teacher_dashboard():
     total_events = Event.query.count()
 
     return render_template(
-        "teacher_dashboard.html",
+        "teacher/teacher_dashboard.html",
         teacher=teacher,
         total_students=total_students,
         total_materials=total_materials,
@@ -987,7 +1035,7 @@ def teacher_students():
     ).all()
 
     return render_template(
-        "hod_students.html",
+        "hod/hod_students.html",
         students=students
     )
 
@@ -1017,7 +1065,7 @@ def upload_material():
 
         return redirect("/study_materials")
 
-    return render_template("upload_material.html")
+    return render_template("teacher/upload_material.html")
 
 @app.route("/edit_material/<int:id>", methods=["GET", "POST"])
 def edit_material(id):
@@ -1046,7 +1094,7 @@ def edit_material(id):
         return redirect("/study_materials")
 
     return render_template(
-        "edit_material.html",
+        "teacher/edit_material.html",
         material=material
     )
 
@@ -1085,7 +1133,7 @@ def teacher_notices():
     ).all()
 
     return render_template(
-    "department_notices.html",
+    "hod/department_notices.html",
     college_notices=college_notices,
     department_notices=department_notices,
     role="Teacher"
@@ -1100,7 +1148,7 @@ def teacher_events():
     events = Event.query.all()
 
     return render_template(
-        "teacher_events.html",
+        "public/events.html",
         events=events
     )
 
@@ -1120,30 +1168,30 @@ def attendance():
 
         today = str(date.today())
 
+        # Check if today's attendance is already marked
+        already_marked = Attendance.query.filter_by(
+            department_id=teacher.department_id,
+            date=today
+        ).first()
+
+        if already_marked:
+            flash("Attendance for today has already been marked!", "warning")
+            return redirect("/attendance")
+
+        # Save attendance
         for student in students:
 
             status = request.form.get(f"status_{student.id}")
 
-            existing = Attendance.query.filter_by(
+            attendance = Attendance(
                 student_id=student.id,
-                date=today
-            ).first()
+                teacher_id=teacher.id,
+                department_id=teacher.department_id,
+                date=today,
+                status=status
+            )
 
-            if existing:
-                existing.status = status
-                existing.teacher_id = teacher.id
-                existing.department_id = teacher.department_id
-
-            else:
-                attendance = Attendance(
-                    student_id=student.id,
-                    teacher_id=teacher.id,
-                    department_id=teacher.department_id,
-                    date=today,
-                    status=status
-                )
-
-                db.session.add(attendance)
+            db.session.add(attendance)
 
         db.session.commit()
 
@@ -1152,7 +1200,7 @@ def attendance():
         return redirect("/attendance")
 
     return render_template(
-        "attendance.html",
+        "teacher/attendance.html",
         students=students,
         teacher=teacher,
         today=date.today()
@@ -1174,11 +1222,43 @@ def department_details(id):
     ).all()
 
     return render_template(
-        "department_details.html",
+        "public/department_details.html",
         department=department,
         teachers=teachers,
         materials=materials,
     )
+import re
+
+@app.route("/download_material/<int:id>")
+def download_material(id):
+
+    material = Material.query.get_or_404(id)
+
+    if "student_id" not in session:
+        flash(
+            "Please login as a registered student to download study materials.",
+            "warning"
+        )
+        return redirect(url_for("login"))
+
+    student = Student.query.get(session["student_id"])
+
+    if not student:
+        flash(
+            "Your ID is not registered by the college administration. You cannot download study materials.",
+            "danger"
+        )
+        return redirect(url_for("department_details", id=material.department_id))
+
+    # Convert Google Drive preview link to direct download link
+    match = re.search(r"/d/([^/]+)", material.link)
+
+    if match:
+        file_id = match.group(1)
+        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        return redirect(download_url)
+
+    return redirect(material.link)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
