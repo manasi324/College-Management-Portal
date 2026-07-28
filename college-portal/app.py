@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from config import Config
-from models import db, Student, User, Department, Teacher, HOD, Notice, Event, Material, Attendance, Mark
+from models import db, Student, User, Department, Teacher, HOD, Notice, Event, Material, Attendance, Result
 from datetime import date
 from flask import flash
 app = Flask(__name__)
@@ -1206,6 +1206,27 @@ def attendance():
         today=date.today()
     )
 
+@app.route("/manage_results", methods=["GET", "POST"])
+def manage_results():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    students = Student.query.filter_by(
+        department_id=teacher.department_id
+    ).all()
+
+    if request.method == "POST":
+
+        # We'll add the saving logic in the next step.
+        pass
+
+    return render_template(
+        "teacher/manage_results.html",
+        students=students
+    )
 # ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
 @app.route("/department/<int:id>")
 def department_details(id):
@@ -1259,6 +1280,9 @@ def download_material(id):
         return redirect(download_url)
 
     return redirect(material.link)
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

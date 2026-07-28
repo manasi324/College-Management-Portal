@@ -83,17 +83,47 @@ class Attendance(db.Model):
     teacher = db.relationship('User')
     department = db.relationship('Department')
 
-class Mark(db.Model):
+
+class Result(db.Model):
+    __tablename__ = "results"
+
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+
+    student_id = db.Column(
+        db.Integer,
+        db.ForeignKey("student.id"),
+        nullable=False
+    )
+
+    teacher_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+
+    department_id = db.Column(
+        db.Integer,
+        db.ForeignKey("departments.id"),
+        nullable=False
+    )
+
+    semester = db.Column(db.String(20), nullable=False)
+
+    exam_type = db.Column(db.String(30), nullable=False)
+
     subject = db.Column(db.String(100), nullable=False)
-    marks = db.Column(db.Integer, nullable=False)
-    total_marks = db.Column(db.Integer, nullable=False, default=100)
-    student = db.relationship('Student')
-    teacher = db.relationship('User')
-    department = db.relationship('Department')
+
+    internal = db.Column(db.Integer, default=0)
+    practical = db.Column(db.Integer, default=0)
+    external = db.Column(db.Integer, default=0)
+    assignment = db.Column(db.Integer, default=0)
+
+    total = db.Column(db.Integer, default=0)
+
+    student = db.relationship("Student")
+    teacher = db.relationship("User")
+    department = db.relationship("Department")
+
 
 class HOD(db.Model):
     __tablename__ = "hods"
