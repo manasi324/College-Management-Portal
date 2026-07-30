@@ -35,6 +35,7 @@
 <th>Internal</th>
 <th>Assignment</th>
 <th>External</th>
+<th>Practical</th>
 <th>Total</th>
 <th>Grade</th>
 <th>Status</th>
@@ -63,6 +64,8 @@
 <td>{{ result.external }}</td>
 
 <td>{{ result.total }}</td>
+
+<td>{{ result.practical }}</td>
 
 <td>{{ result.grade }}</td>
 
@@ -96,7 +99,8 @@ Edit
 
 <a
 href="/delete_result/{{ result.id }}"
-class="btn btn-danger btn-sm">
+class="btn btn-danger btn-sm"
+onclick="return confirm('Are you sure you want to delete this result?');">
 
 Delete
 

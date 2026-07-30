@@ -1276,12 +1276,13 @@ def manage_results():
                 result.external = mark
 
             elif exam_type == "Practical":
-                result.external = mark   # We'll improve this later
+                result.practical = mark   # We'll improve this later
 
             result.total = (
                 result.internal +
                 result.assignment +
-                result.external
+                result.external +
+                result.practical
             )
 
             percentage = result.total
@@ -1362,7 +1363,69 @@ def view_results():
         "teacher/view_results.html",
         results=results
     )
+@app.route("/edit_result/<int:id>", methods=["GET", "POST"])
+def edit_result(id):
 
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    result = Result.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        result.internal = int(request.form["internal"])
+        result.assignment = int(request.form["assignment"])
+        result.external = int(request.form["external"])
+        result.practical = int(request.form["practical"])
+
+        result.total = (
+            result.internal +
+            result.assignment +
+            result.external +
+            result.practical
+        )
+
+        if result.total >= 90:
+            result.grade = "A+"
+        elif result.total >= 80:
+            result.grade = "A"
+        elif result.total >= 70:
+            result.grade = "B+"
+        elif result.total >= 60:
+            result.grade = "B"
+        elif result.total >= 50:
+            result.grade = "C"
+        elif result.total >= 40:
+            result.grade = "D"
+        else:
+            result.grade = "F"
+
+        result.status = "PASS" if result.total >= 40 else "FAIL"
+
+        db.session.commit()
+
+        flash("Result Updated Successfully!", "success")
+
+        return redirect("/view_results")
+
+    return render_template(
+        "teacher/edit_result.html",
+        result=result
+    )
+@app.route("/delete_result/<int:id>")
+def delete_result(id):
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    result = Result.query.get_or_404(id)
+
+    db.session.delete(result)
+    db.session.commit()
+
+    flash("Result Deleted Successfully!", "success")
+
+    return redirect("/view_results")    
 # ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
 @app.route("/department/<int:id>")
 def department_details(id):

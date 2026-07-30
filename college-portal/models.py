@@ -121,6 +121,9 @@ class Result(db.Model):
 
     external = db.Column(db.Integer, default=0)
 
+    # NEW
+    practical = db.Column(db.Integer, default=0)
+
     total = db.Column(db.Integer)
 
     grade = db.Column(db.String(5))
