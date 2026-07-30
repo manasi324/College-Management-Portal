@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import (Flask, render_template, request, redirect, session, url_for, jsonify)
 from config import Config
-from models import db, Student, User, Department, Teacher, HOD, Notice, Event, Material, Attendance, Result
+from models import (db,Student,User,Department,Teacher,HOD,Notice,Event,Material,Attendance,Result,Subject)
 from datetime import date
 from flask import flash
+from models import Subject
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = "collegeportal"
@@ -1218,15 +1219,150 @@ def manage_results():
         department_id=teacher.department_id
     ).all()
 
+    subjects = Subject.query.filter_by(
+        department_id=teacher.department_id
+    ).all()
+
     if request.method == "POST":
 
-        # We'll add the saving logic in the next step.
-        pass
+        student_id = request.form["student_id"]
+        semester = int(request.form["semester"].replace("Semester ", ""))
+        exam_type = request.form["exam_type"]
+
+        subjects_list = request.form.getlist("subject[]")
+        marks = request.form.getlist("marks[]")
+
+        for subject_name, mark in zip(subjects_list, marks):
+
+            subject = Subject.query.filter_by(
+                subject_name=subject_name,
+                semester=semester,
+                department_id=teacher.department_id
+            ).first()
+
+            if not subject:
+                continue
+
+            result = Result.query.filter_by(
+                student_id=student_id,
+                subject_id=subject.id,
+                semester=semester
+            ).first()
+
+            if not result:
+
+                result = Result(
+                    student_id=student_id,
+                    teacher_id=teacher.id,
+                    department_id=teacher.department_id,
+                    subject_id=subject.id,
+                    semester=semester,
+                    internal=0,
+                    assignment=0,
+                    external=0
+                )
+
+                db.session.add(result)
+
+            mark = int(mark)
+
+            if exam_type == "Internal":
+                result.internal = mark
+
+            elif exam_type == "Assignment":
+                result.assignment = mark
+
+            elif exam_type == "External":
+                result.external = mark
+
+            elif exam_type == "Practical":
+                result.external = mark   # We'll improve this later
+
+            result.total = (
+                result.internal +
+                result.assignment +
+                result.external
+            )
+
+            percentage = result.total
+
+            if percentage >= 90:
+                result.grade = "A+"
+            elif percentage >= 80:
+                result.grade = "A"
+            elif percentage >= 70:
+                result.grade = "B+"
+            elif percentage >= 60:
+                result.grade = "B"
+            elif percentage >= 50:
+                result.grade = "C"
+            elif percentage >= 40:
+                result.grade = "D"
+            else:
+                result.grade = "F"
+
+            result.status = "PASS" if percentage >= 40 else "FAIL"
+
+        db.session.commit()
+
+        flash("Results Saved Successfully!", "success")
+
+        return redirect("/manage_results")
 
     return render_template(
         "teacher/manage_results.html",
-        students=students
+        students=students,
+        subjects=subjects
     )
+
+@app.route("/get_subjects/<int:semester>")
+def get_subjects(semester):
+
+    if session.get("role") != "Teacher":
+        return jsonify([])
+
+    teacher = User.query.get(session["user_id"])
+
+    subjects = Subject.query.filter_by(
+        department_id=teacher.department_id,
+        semester=semester
+    ).all()
+
+    return jsonify([
+        {
+            "id": s.id,
+            "name": s.subject_name
+        }
+        for s in subjects
+    ])
+
+@app.route("/view_results")
+def view_results():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    results = db.session.query(
+        Result,
+        Student,
+        Subject
+    ).join(
+        Student,
+        Result.student_id == Student.id
+    ).join(
+        Subject,
+        Result.subject_id == Subject.id
+    ).filter(
+        Result.department_id == teacher.department_id
+    ).all()
+
+    return render_template(
+        "teacher/view_results.html",
+        results=results
+    )
+
 # ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
 @app.route("/department/<int:id>")
 def department_details(id):
@@ -1280,9 +1416,6 @@ def download_material(id):
         return redirect(download_url)
 
     return redirect(material.link)
-
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

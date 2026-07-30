@@ -76,15 +76,17 @@
 
 <label>Exam Type</label>
 
-<select class="form-select" name="exam_type" required>
+<select
+    class="form-select"
+    id="examType"
+    name="exam_type"
+    required>
 
-<option value="">Select</option>
-
-<option>Internal</option>
-
-<option>External</option>
-
-<option>Practical</option>
+    <option value="">Select</option>
+    <option value="Internal">Internal</option>
+    <option value="External">External</option>
+    <option value="Practical">Practical</option>
+    <option value="Assignment">Assignment / Journal / Attendance</option>
 
 </select>
 
@@ -131,62 +133,16 @@ required>
 
 <table class="table table-bordered">
 
-<thead>
+    <thead>
+        <tr>
+            <th>Subject</th>
+            <th>Marks Obtained</th>
+            <th>Total Marks</th>
+        </tr>
+    </thead>
 
-<tr>
-
-<th>Subject</th>
-
-<th>Marks Obtained</th>
-
-<th>Total Marks</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for i in range(6) %}
-
-<tr>
-
-<td>
-
-<input
-type="text"
-class="form-control"
-name="subject[]"
-required>
-
-</td>
-
-<td>
-
-<input
-type="number"
-class="form-control"
-name="marks[]"
-required>
-
-</td>
-
-<td>
-
-<input
-type="number"
-class="form-control"
-name="total[]"
-value="100"
-required>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
+    <tbody id="subjectsTable">
+    </tbody>
 
 </table>
 
@@ -199,7 +155,39 @@ Save Result
 </button>
 
 </div>
+<div class="text-center mt-3">
 
+    <button
+        type="button"
+        id="loadSubjects"
+        class="btn btn-primary">
+
+        Load Subjects
+
+    </button>
+
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+
+        {% for category, message in messages %}
+
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+{% endwith %}
+
+<a
+href="/view_results"
+class="btn btn-success">
+
+View Results
+
+</a>
 </form>
 
 </div>
@@ -208,5 +196,119 @@ Save Result
 
 </div>
 
+<script>
+
+document.getElementById("loadSubjects").onclick = function () {
+
+    let semester = document.querySelector("[name='semester']").value;
+    let examType = document.getElementById("examType").value;
+
+    if (semester == "") {
+        alert("Select Semester First");
+        return;
+    }
+
+    semester = semester.replace("Semester ", "");
+
+    fetch("/get_subjects/" + semester)
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        let table = document.getElementById("subjectsTable");
+
+        table.innerHTML = "";
+
+        // Decide total marks
+        let total = 0;
+
+        if (examType === "Internal")
+            total = 20;
+
+        else if (examType == "External")
+            total = 30;
+
+        else if (examType == "Practical")
+            total = 30;
+
+        else if (examType == "Assignment / Journal / Attendance")
+            total = 20;
+
+        data.forEach(subject => {
+
+            table.innerHTML += `
+
+            <tr>
+
+                <td>
+
+                    <input
+                        type="hidden"
+                        name="subject[]"
+                        value="${subject.name}">
+
+                    ${subject.name}
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        class="form-control"
+                        name="marks[]"
+                        min="0"
+                        max="${total}"
+                        required>
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        class="form-control totalMarks"
+                        name="total[]"
+                        value="${total}"
+                        readonly>
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    });
+
+};
+
+
+// Change Total Marks when Exam Type changes
+document.getElementById("examType").addEventListener("change", function () {
+
+    let total = 0;
+
+    if (this.value == "Internal")
+        total = 20;
+
+    else if (this.value == "External")
+        total = 30;
+
+    else if (this.value == "Practical")
+        total = 30;
+
+    else if (this.value == "Assignment")
+        total = 20;
+
+    document.querySelectorAll(".totalMarks").forEach(function(box){
+        box.value = total;
+    });
+
+});
+
+</script>
 </body>
 </html>

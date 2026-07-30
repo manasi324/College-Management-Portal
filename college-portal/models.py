@@ -107,23 +107,49 @@ class Result(db.Model):
         nullable=False
     )
 
-    semester = db.Column(db.String(20), nullable=False)
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey("subjects.id"),
+        nullable=False
+    )
 
-    exam_type = db.Column(db.String(30), nullable=False)
-
-    subject = db.Column(db.String(100), nullable=False)
+    semester = db.Column(db.Integer)
 
     internal = db.Column(db.Integer, default=0)
-    practical = db.Column(db.Integer, default=0)
-    external = db.Column(db.Integer, default=0)
+
     assignment = db.Column(db.Integer, default=0)
 
-    total = db.Column(db.Integer, default=0)
+    external = db.Column(db.Integer, default=0)
+
+    total = db.Column(db.Integer)
+
+    grade = db.Column(db.String(5))
+
+    status = db.Column(db.String(20))
 
     student = db.relationship("Student")
     teacher = db.relationship("User")
     department = db.relationship("Department")
+    subject = db.relationship("Subject")
 
+class Subject (db.Model):
+    __tablename__ = "subjects"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    course = db.Column(db.String(100), nullable=False)
+
+    semester = db.Column(db.Integer, nullable=False)
+
+    subject_name = db.Column(db.String(200), nullable=False)
+
+    department_id = db.Column(
+        db.Integer,
+        db.ForeignKey("departments.id"),
+        nullable=False
+    )
+
+    department = db.relationship("Department")
 
 class HOD(db.Model):
     __tablename__ = "hods"
