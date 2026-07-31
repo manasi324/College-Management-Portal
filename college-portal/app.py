@@ -1,9 +1,21 @@
 from flask import (Flask, render_template, request, redirect, session, url_for, jsonify)
 from config import Config
 from models import (db,Student,User,Department,Teacher,HOD,Notice,Event,Material,Attendance,Result,Subject)
-from datetime import date
 from flask import flash
-from models import Subject
+from datetime import date
+from reportlab.platypus import ( SimpleDocTemplate,Table,TableStyle,Paragraph,Spacer )
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER
+from flask import send_file
+import io
+import os
+from datetime import datetime
+from reportlab.platypus import Image
+import qrcode
+import tempfile
+
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = "collegeportal"
@@ -289,10 +301,327 @@ def edit_profile():
 
     return render_template('student/edit_profile.html', student=student)
 
+@app.route("/student_results")
+def student_results():
+
+    if session.get("role") != "Student":
+        return redirect("/login")
+
+    student = Student.query.get(session["student_id"])
+
+    results = Result.query.filter_by(
+        student_id=student.id
+    ).order_by(
+        Result.semester,
+        Result.subject_id
+    ).all()
+
+    return render_template(
+        "student/my_results.html",
+        student=student,
+        results=results
+    )
+
+@app.route("/download_result")
+def download_result():
+
+    if "student_id" not in session:
+        return redirect("/login")
+
+    student = Student.query.get(session["student_id"])
+
+    results = (
+        Result.query
+        .filter_by(student_id=student.id)
+        .order_by(Result.semester, Result.subject_id)
+        .all()
+    )
+
+    if not results:
+        flash("No results available.", "warning")
+        return redirect("/my_result")
+
+    # ---------------- PDF ----------------
+
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        leftMargin=30,
+        rightMargin=30,
+        topMargin=30,
+        bottomMargin=30
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = styles["Title"]
+    title_style.alignment = TA_CENTER
+
+    heading_style = styles["Heading2"]
+    heading_style.alignment = TA_CENTER
+
+    normal = styles["BodyText"]
+
+    elements = []
+
+    # ---------------- Logo ----------------
+
+    logo_path = os.path.join("static", "images", "royal_logo.png")
+
+    if os.path.exists(logo_path):
+        logo = Image(logo_path)
+        logo.drawWidth = 70
+        logo.drawHeight = 70
+        logo.hAlign = "CENTER"
+        elements.append(logo)
+
+    # ---------------- Heading ----------------
+
+    elements.append(
+        Paragraph(
+            "<font size='22' color='#003366'><b>ROYAL COLLEGE, Mira Road (East), Thane - 401107"</b></font>",
+            title_style
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            "<font size='14'><b>Affiliated to University of Mumbai</b></font>",
+            heading_style
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            "<font size='16' color='#1565C0'><b>OFFICIAL STUDENT MARKSHEET</b></font>",
+            heading_style
+        )
+    )
+
+    elements.append(Spacer(1, 20))
+    elements.append(HRFlowable(
+    width="100%",
+    thickness=2,
+    color=colors.HexColor("#1565C0")
+))
+
+    elements.append(Spacer(1,15))
+    # ---------------- Student Information ----------------
+
+    student_info = [
+        ["Student Name", student.name],
+        ["Student ID", str(student.id)],
+        ["Course", student.course],
+        ["Semester", str(results[0].semester)],
+        ["Academic Year", "2026-2027"],
+        ["Date of Issue", datetime.now().strftime("%d-%m-%Y")]
+    ]
+
+    info_table = Table(
+        student_info,
+        colWidths=[150, 270]
+    )
+
+    info_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1565C0")),
+        ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+        ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+    ]))
+
+    elements.append(info_table)
+
+    elements.append(Spacer(1, 25))
+
+    # ---------------- Marks Table ----------------
+
+    table_data = [[
+        "Subject",
+        "Internal",
+        "Assignment",
+        "External",
+        "Practical",
+        "Total",
+        "Grade",
+        "Status"
+    ]]
+
+    grand_total = 0
+
+    for r in results:
+        grand_total += r.total
+
+        table_data.append([
+            r.subject.subject_name,
+            r.internal,
+            r.assignment,
+            r.external,
+            r.practical,
+            r.total,
+            r.grade,
+            r.status
+        ])
+
+    marks_table = Table(
+        table_data,
+        colWidths=[170, 55, 65, 60, 60, 50, 45, 55]
+    )
+
+    marks_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#003399")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
+    ]))
+
+    elements.append(marks_table)
+
+    elements.append(Spacer(1, 20))
+
+    # ---------------- Overall Summary ----------------
+
+    percentage = grand_total / len(results)
+
+    if percentage >= 90:
+        grade = "A+"
+    elif percentage >= 80:
+        grade = "A"
+    elif percentage >= 70:
+        grade = "B+"
+    elif percentage >= 60:
+        grade = "B"
+    elif percentage >= 50:
+        grade = "C"
+    elif percentage >= 40:
+        grade = "D"
+    else:
+        grade = "F"
+
+    status = "PASS" if percentage >= 40 else "FAIL"
+
+    summary = [
+        ["Overall Percentage", f"{percentage:.2f}%"],
+        ["Overall Grade", grade],
+        ["Result", status]
+    ]
+
+    summary_table = Table(
+        summary,
+        colWidths=[170, 120]
+    )
+
+    summary_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1565C0")),
+        ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+        ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
+    ]))
+
+    elements.append(summary_table)
+
+    elements.append(Spacer(1, 20))
+
+    elements.append(
+        Paragraph(
+            f"<b>Generated On:</b> {datetime.now().strftime('%d-%m-%Y %H:%M')}",
+            normal
+        )
+    )
+
+    elements.append(Spacer(1, 45))
+
+    # ---------------- QR Code ----------------
+
+    qr_data = f"""
+    ROYAL COLLEGE
+
+    Student : {student.name}
+    Student ID : {student.id}
+    Course : {student.course}
+    Semester : {results[0].semester}
+
+    Percentage : {percentage:.2f}%
+    Grade : {grade}
+    Result : {status}
+
+    Generated by Royal College Management Portal
+    """
+
+    qr = qrcode.make(qr_data)
+
+    temp_qr = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    qr.save(temp_qr.name)
+    # ---------------- Signature ----------------
+
+    sign = Table([
+        [
+            "__________________",
+            "",
+            "__________________"
+        ],
+        [
+            "Controller of Examination",
+            "",
+            "Principal"
+        ]
+    ])
+
+    sign.setStyle(TableStyle([
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 15),
+    ]))
+
+    elements.append(sign)
+     
+    elements.append(Spacer(1, 20))
+
+    qr_image = Image(temp_qr.name)
+    qr_image.drawWidth = 90
+    qr_image.drawHeight = 90
+    qr_image.hAlign = "RIGHT"
+
+    elements.append(qr_image)
+
+    # ---------------- Border ----------------
+
+    def draw_border(canvas, doc):
+        canvas.saveState()
+        canvas.setStrokeColor(colors.HexColor("#1565C0"))
+        canvas.setLineWidth(3)
+        canvas.rect(
+            20,
+            20,
+            doc.pagesize[0] - 40,
+            doc.pagesize[1] - 40
+        )
+        canvas.restoreState()
+
+    doc.build(
+        elements,
+        onFirstPage=draw_border,
+        onLaterPages=draw_border
+    )
+
+    buffer.seek(0)
+
+    return send_file ( buffer,
+            as_attachment=True,
+            download_name=f"{student.name}_Marksheet.pdf",
+            mimetype="application/pdf"
+            os.unlink(temp_qr.name)
+    )
 
 # ==================== PRINCIPAL ROUTES ====================
 
-@app.route('/principal_dashboard')
+@app.route( '/principal_dashboard')
 def principal_dashboard():
     if session.get("role") != "Principal":
         return redirect("/login")
@@ -1337,32 +1666,6 @@ def get_subjects(semester):
         for s in subjects
     ])
 
-@app.route("/view_results")
-def view_results():
-
-    if session.get("role") != "Teacher":
-        return redirect("/login")
-
-    teacher = User.query.get(session["user_id"])
-
-    results = db.session.query(
-        Result,
-        Student,
-        Subject
-    ).join(
-        Student,
-        Result.student_id == Student.id
-    ).join(
-        Subject,
-        Result.subject_id == Subject.id
-    ).filter(
-        Result.department_id == teacher.department_id
-    ).all()
-
-    return render_template(
-        "teacher/view_results.html",
-        results=results
-    )
 @app.route("/edit_result/<int:id>", methods=["GET", "POST"])
 def edit_result(id):
 
@@ -1426,6 +1729,67 @@ def delete_result(id):
     flash("Result Deleted Successfully!", "success")
 
     return redirect("/view_results")    
+
+@app.route("/student_result/<int:student_id>", methods=["GET", "POST"])
+def student_result(student_id):
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    student = Student.query.get_or_404(student_id)
+
+    if request.method == "POST":
+
+        results = Result.query.filter_by(student_id=student_id).all()
+
+        for result in results:
+
+            result.internal = int(request.form[f"internal_{result.id}"])
+            result.assignment = int(request.form[f"assignment_{result.id}"])
+            result.external = int(request.form[f"external_{result.id}"])
+            result.practical = int(request.form[f"practical_{result.id}"])
+
+            result.total = (
+                result.internal +
+                result.assignment +
+                result.external +
+                result.practical
+            )
+
+            percentage = result.total
+
+            if percentage >= 90:
+                result.grade = "A+"
+            elif percentage >= 80:
+                result.grade = "A"
+            elif percentage >= 70:
+                result.grade = "B+"
+            elif percentage >= 60:
+                result.grade = "B"
+            elif percentage >= 50:
+                result.grade = "C"
+            elif percentage >= 40:
+                result.grade = "D"
+            else:
+                result.grade = "F"
+
+            result.status = "PASS" if percentage >= 40 else "FAIL"
+
+        db.session.commit()
+
+        flash("Results Updated Successfully!", "success")
+
+        return redirect(f"/student_result/{student_id}")
+
+    results = Result.query.filter_by(student_id=student_id)\
+        .order_by(Result.semester, Result.subject_id)\
+        .all()
+
+    return render_template(
+        "teacher/student_result.html",
+        student=student,
+        results=results
+    )
 # ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
 @app.route("/department/<int:id>")
 def department_details(id):

@@ -37,17 +37,27 @@
                         <td>{{ student.course }}</td>
                         <td>{{ student.year }}</td>
                         <td>{{ student.department.name }}</td>
-                        <td>
-                            <a href="/edit_student/{{ student.id }}" class="btn btn-warning btn-sm">
-                                Edit
+                        
+                          <td>
+
+                          <a href="/edit_student/{{ student.id }}"
+                             class="btn btn-warning btn-sm">
+                             Edit
                             </a>
 
-                            <a href="/delete_student/{{ student.id }}"
+                           <a href="/delete_student/{{ student.id }}"
                                class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure?')">
-                                Delete
+                              onclick="return confirm('Delete this student?')">
+                              Delete
                             </a>
+
+                            <a href="/student_result/{{ student.id }}"
+                             class="btn btn-primary btn-sm">
+                             View Result
+                            </a>
+
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>
