@@ -379,12 +379,11 @@ def download_result():
     # ---------------- Heading ----------------
 
     elements.append(
-        Paragraph(
-            "<font size='22' color='#003366'><b>ROYAL COLLEGE, Mira Road (East), Thane - 401107"</b></font>",
-            title_style
-        )
+    Paragraph(
+        "<font size='22' color='#003366'><b>ROYAL COLLEGE, Mira Road (East), Thane - 401107</b></font>",
+        title_style
     )
-
+)
     elements.append(
         Paragraph(
             "<font size='14'><b>Affiliated to University of Mumbai</b></font>",
@@ -612,12 +611,20 @@ def download_result():
 
     buffer.seek(0)
 
-    return send_file ( buffer,
-            as_attachment=True,
-            download_name=f"{student.name}_Marksheet.pdf",
-            mimetype="application/pdf"
-            os.unlink(temp_qr.name)
-    )
+    try:
+         os.unlink(temp_qr.name)
+    except:
+      pass
+
+    return send_file(
+       buffer,
+    as_attachment=True,
+    download_name=f"{student.name}_Marksheet.pdf",
+    mimetype="application/pdf"
+)
+
+   
+ 
 
 # ==================== PRINCIPAL ROUTES ====================
 
@@ -1588,7 +1595,8 @@ def manage_results():
                     semester=semester,
                     internal=0,
                     assignment=0,
-                    external=0
+                    external=0,
+                    practical=0
                 )
 
                 db.session.add(result)
