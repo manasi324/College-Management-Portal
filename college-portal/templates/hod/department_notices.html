@@ -96,14 +96,15 @@
                 <p>{{ notice.description }}</p>
 
                 <a
-                    href="/edit_notice/{{ notice.id }}"
+                    href="/edit_department_notice/{{ notice.id }}"
                     class="btn btn-warning btn-sm">
                     Edit
                 </a>
 
                 <a
-                    href="/delete_notice/{{ notice.id }}"
-                    class="btn btn-danger btn-sm">
+                    href="/delete_department_notice/{{ notice.id }}"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Are you sure you want to delete this notice?');">
                     Delete
                 </a>
 

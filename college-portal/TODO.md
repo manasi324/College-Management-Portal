@@ -55,6 +55,17 @@
 - [x] 7. Each page has a "Back to Dashboard" button for easy navigation
 - [x] 8. Python syntax check: `python -m py_compile app.py` → exit code 0
 
+## Delete Notice Confirmation Alert Box
+- [x] 1. Added `onclick="return confirm('Are you sure you want to delete this notice?')"` to Delete buttons in:
+  - `templates/principal/manage_notices.html` (Principal dashboard)
+  - `templates/hod/department_notices.html` (Teacher/HOD dashboard)
+- [x] 2. Confirmation prevents accidental deletion by requiring the user to confirm before the delete action proceeds
+
+## Teacher Notice Edit/Delete Redirect Bug Fix
+- [x] 1. Diagnosed: `department_notices.html` had Edit/Delete buttons linking to Principal-only routes (`/edit_notice`, `/delete_notice`)
+- [x] 2. Fixed: changed links to `/edit_department_notice/{{ id }}` and `/delete_department_notice/{{ id }}` which allow Teacher + HOD roles
+- [x] 3. Verified `hod/edit_notice.html` form posts to current URL (no hardcoded action) with correct role-based Cancel redirects
+
 ## HOD Dashboard Crash Fix (view returned None)
 - [x] 1. Diagnose the "view function did not return a valid response" error
 - [x] 2. Verified `hod_dashboard` function source has a proper `return` (AST-based diag)
