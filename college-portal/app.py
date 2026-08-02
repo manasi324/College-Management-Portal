@@ -5,6 +5,7 @@ from flask import flash
 from datetime import date
 from reportlab.platypus import ( SimpleDocTemplate,Table,TableStyle,Paragraph,Spacer )
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER
@@ -15,7 +16,13 @@ from datetime import datetime
 from reportlab.platypus import Image
 import qrcode
 import tempfile
-
+from reportlab.platypus import HRFlowable
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from PIL import Image as PILImage
+from PIL import ImageDraw as PILDraw
+from PIL import ImageFont as PILFont
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = "collegeportal"
@@ -238,10 +245,10 @@ def dashboard():
         return redirect('/login')
 
     student = Student.query.get(session['student_id'])
+    cga = calculate_cgpa(student.id)
+    sgpa_data = semester_sgpas(student.id)
 
-    print("✅ LOADING dashboard.html")
-
-    return render_template('student/dashboard.html', student=student)
+    return render_template('student/dashboard.html', student=student, cga=cga, sgpa_data=sgpa_data)
 
 
 @app.route('/profile')
@@ -339,7 +346,7 @@ def download_result():
 
     if not results:
         flash("No results available.", "warning")
-        return redirect("/my_result")
+        return redirect("/student_results")
 
     # ---------------- PDF ----------------
 
@@ -347,10 +354,11 @@ def download_result():
 
     doc = SimpleDocTemplate(
         buffer,
-        leftMargin=30,
-        rightMargin=30,
-        topMargin=30,
-        bottomMargin=30
+        pagesize=landscape(A4),
+        leftMargin=20,
+        rightMargin=20,
+        topMargin=20,
+        bottomMargin=20
     )
 
     styles = getSampleStyleSheet()
@@ -365,25 +373,39 @@ def download_result():
 
     elements = []
 
+    # Temp files to clean up after PDF build
+    temp_files = []
+
+    # Ensure placeholder assets exist (signatures, seal, photo)
+    assets = ensure_static_assets()
+
     # ---------------- Logo ----------------
 
-    logo_path = os.path.join("static", "images", "royal_logo.png")
+    logo_path = os.path.join("static", "image", "royal_logo.png")
 
     if os.path.exists(logo_path):
         logo = Image(logo_path)
-        logo.drawWidth = 70
-        logo.drawHeight = 70
+        logo.drawWidth = 80
+        logo.drawHeight = 80
         logo.hAlign = "CENTER"
         elements.append(logo)
 
     # ---------------- Heading ----------------
 
     elements.append(
-    Paragraph(
-        "<font size='22' color='#003366'><b>ROYAL COLLEGE, Mira Road (East), Thane - 401107</b></font>",
-        title_style
+        Paragraph(
+            "<font size='22' color='#003366'><b>ROYAL COLLEGE</b></font>",
+            title_style
+        )
     )
-)
+
+    elements.append(
+        Paragraph(
+            "<font size='13' color='#003366'><b>Mira Road (East), Thane - 401107</b></font>",
+            heading_style
+        )
+    )
+
     elements.append(
         Paragraph(
             "<font size='14'><b>Affiliated to University of Mumbai</b></font>",
@@ -393,23 +415,45 @@ def download_result():
 
     elements.append(
         Paragraph(
-            "<font size='16' color='#1565C0'><b>OFFICIAL STUDENT MARKSHEET</b></font>",
+            "<font size='12' color='#0D47A1'><b>Accredited by NAAC 'A' Grade</b></font>",
             heading_style
         )
     )
 
-    elements.append(Spacer(1, 20))
-    elements.append(HRFlowable(
-    width="100%",
-    thickness=2,
-    color=colors.HexColor("#1565C0")
-))
+    elements.append(
+        Paragraph(
+            "<font size='17' color='#1565C0'><b>OFFICIAL STUDENT MARKSHEET</b></font>",
+            heading_style
+        )
+    )
 
-    elements.append(Spacer(1,15))
-    # ---------------- Student Information ----------------
+    # University Seat / Roll Number
+    seat_number = get_seat_number(student)
+
+    elements.append(
+        Paragraph(
+            f"<font size='11' color='#003366'><b>University Seat No: {seat_number}</b></font>",
+            heading_style
+        )
+    )
+
+    elements.append(Spacer(1, 14))
+
+    elements.append(
+        HRFlowable(
+            width="100%",
+            thickness=2,
+            color=colors.HexColor("#1565C0")
+        )
+    )
+
+    elements.append(Spacer(1, 15))
+
+    # ---------------- Student Information + Photograph ----------------
 
     student_info = [
         ["Student Name", student.name],
+        ["University Seat No.", seat_number],
         ["Student ID", str(student.id)],
         ["Course", student.course],
         ["Semester", str(results[0].semester)],
@@ -422,17 +466,40 @@ def download_result():
         colWidths=[150, 270]
     )
 
-    info_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1565C0")),
-        ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
-        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-        ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-        ("TOPPADDING", (0, 0), (-1, -1), 8),
-    ]))
+    info_table.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1565C0")),
+            ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+            ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+            ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+            ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ])
+    )
 
-    elements.append(info_table)
+    # Student photograph (auto-generated placeholder if missing)
+    photo_path = generate_student_photo(student)
+    photo_img = Image(photo_path)
+    photo_img.drawWidth = 85
+    photo_img.drawHeight = 95
+    photo_img.hAlign = "CENTER"
+
+    info_with_photo = Table(
+        [[info_table, photo_img]],
+        colWidths=[430, 95]
+    )
+
+    info_with_photo.setStyle(
+        TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (1, 0), (1, 0), "CENTER"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ])
+    )
+
+    elements.append(info_with_photo)
 
     elements.append(Spacer(1, 25))
 
@@ -440,6 +507,8 @@ def download_result():
 
     table_data = [[
         "Subject",
+        "Credits",
+        "Grade Point",
         "Internal",
         "Assignment",
         "External",
@@ -456,6 +525,8 @@ def download_result():
 
         table_data.append([
             r.subject.subject_name,
+            2,
+            get_grade_point(r.grade),
             r.internal,
             r.assignment,
             r.external,
@@ -467,18 +538,21 @@ def download_result():
 
     marks_table = Table(
         table_data,
-        colWidths=[170, 55, 65, 60, 60, 50, 45, 55]
+        colWidths=[170, 55, 65, 55, 70, 55, 60, 50, 50, 55]
     )
 
-    marks_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#003399")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
-    ]))
+    marks_table.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#003399")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, 0), 8),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+        ])
+    )
 
     elements.append(marks_table)
 
@@ -487,6 +561,8 @@ def download_result():
     # ---------------- Overall Summary ----------------
 
     percentage = grand_total / len(results)
+    sgpa = calculate_sgpa(results)
+    cgpa = calculate_cgpa(student.id)
 
     if percentage >= 90:
         grade = "A+"
@@ -507,6 +583,8 @@ def download_result():
 
     summary = [
         ["Overall Percentage", f"{percentage:.2f}%"],
+        ["SGPA", f"{sgpa:.2f}"],
+        ["CGPA", f"{cgpa:.2f}"],
         ["Overall Grade", grade],
         ["Result", status]
     ]
@@ -516,17 +594,133 @@ def download_result():
         colWidths=[170, 120]
     )
 
-    summary_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1565C0")),
-        ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
-        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-        ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
-    ]))
+    summary_table.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#0D47A1")),
+            ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+            ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+            ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
+        ])
+    )
 
     elements.append(summary_table)
 
     elements.append(Spacer(1, 20))
+
+    # ---------------- Performance Summary Box ----------------
+
+    total_subjects = len(results)
+    total_credits = total_subjects * 2
+    credits_earned = sum(
+        2 for r in results if r.grade != "F"
+    )
+
+    performance_heading = Paragraph(
+        "<font size='13' color='#003366'><b>PERFORMANCE SUMMARY</b></font>",
+        heading_style
+    )
+
+    performance_data = [
+        ["Total Subjects", str(total_subjects)],
+        ["Total Credits", str(total_credits)],
+        ["Credits Earned", str(credits_earned)],
+        ["SGPA", f"{sgpa:.2f}"],
+        ["CGPA", f"{cgpa:.2f}"],
+        ["Overall Percentage", f"{percentage:.2f}%"],
+        ["Result", status]
+    ]
+
+    performance_table = Table(
+        performance_data,
+        colWidths=[170, 120],
+        hAlign="CENTER"
+    )
+
+    performance_table.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#0D47A1")),
+            ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+            ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+            ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+            ("BACKGROUND", (1, 0), (1, -1), colors.whitesmoke),
+            ("ALIGN", (1, 0), (1, -1), "CENTER"),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ])
+    )
+
+    elements.append(performance_heading)
+    elements.append(Spacer(1, 10))
+    elements.append(performance_table)
+
+    elements.append(Spacer(1, 20))
+
+    # ---------------- Semester-wise SGPA Table ----------------
+
+    sgpa_data = semester_sgpas(student.id)
+
+    if sgpa_data:
+
+        sgpa_heading = Paragraph(
+            "<font size='13' color='#003366'><b>SEMESTER-WISE SGPA</b></font>",
+            heading_style
+        )
+
+        elements.append(sgpa_heading)
+
+        elements.append(Spacer(1, 10))
+
+        sgpa_table_data = [["Semester", "SGPA"]]
+
+        for entry in sgpa_data:
+            sgpa_table_data.append([
+                f"Semester {entry['semester']}",
+                f"{entry['sgpa']:.2f}"
+            ])
+
+        sgpa_table = Table(
+            sgpa_table_data,
+            colWidths=[150, 120]
+        )
+
+        sgpa_table.setStyle(
+            TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1565C0")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ])
+        )
+
+        # Place SGPA table beside the SGPA bar chart
+        graph_path = generate_sgpa_graph(sgpa_data, student)
+        temp_files.append(graph_path)
+
+        graph_img = Image(graph_path)
+        graph_img.drawWidth = 250
+        graph_img.drawHeight = 130
+        graph_img.hAlign = "CENTER"
+
+        sgpa_combined = Table(
+            [[sgpa_table, graph_img]],
+            colWidths=[270, 250]
+        )
+
+        sgpa_combined.setStyle(
+            TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ])
+        )
+
+        elements.append(sgpa_combined)
+
+        elements.append(Spacer(1, 20))
 
     elements.append(
         Paragraph(
@@ -535,64 +729,136 @@ def download_result():
         )
     )
 
-    elements.append(Spacer(1, 45))
+    elements.append(Spacer(1, 15))
+
+    # ---------------- Result Declaration ----------------
+
+    declaration = Table(
+        [[Paragraph(
+            "<i>This marksheet is computer generated and does not require a physical signature.</i>",
+            normal
+        )]],
+        colWidths=[530]
+    )
+
+    declaration.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#E8F0FE")),
+            ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#1565C0")),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("TOPPADDING", (0, 0), (-1, -1), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ])
+    )
+
+    elements.append(declaration)
+
+    elements.append(Spacer(1, 15))
 
     # ---------------- QR Code ----------------
 
     qr_data = f"""
-    ROYAL COLLEGE
+ROYAL COLLEGE
 
-    Student : {student.name}
-    Student ID : {student.id}
-    Course : {student.course}
-    Semester : {results[0].semester}
+Student Name : {student.name}
+Student ID   : {student.id}
+Course       : {student.course}
+Semester     : {results[0].semester}
 
-    Percentage : {percentage:.2f}%
-    Grade : {grade}
-    Result : {status}
+Percentage   : {percentage:.2f}%
+Grade        : {grade}
+Result       : {status}
 
-    Generated by Royal College Management Portal
-    """
+Generated On : {datetime.now().strftime('%d-%m-%Y')}
+"""
 
     qr = qrcode.make(qr_data)
 
-    temp_qr = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    temp_qr = tempfile.NamedTemporaryFile(
+        suffix=".png",
+        delete=False
+    )
+
     qr.save(temp_qr.name)
-    # ---------------- Signature ----------------
-
-    sign = Table([
-        [
-            "__________________",
-            "",
-            "__________________"
-        ],
-        [
-            "Controller of Examination",
-            "",
-            "Principal"
-        ]
-    ])
-
-    sign.setStyle(TableStyle([
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("TOPPADDING", (0, 0), (-1, -1), 15),
-    ]))
-
-    elements.append(sign)
-     
-    elements.append(Spacer(1, 20))
 
     qr_image = Image(temp_qr.name)
-    qr_image.drawWidth = 90
-    qr_image.drawHeight = 90
-    qr_image.hAlign = "RIGHT"
+    qr_image.drawWidth = 75
+    qr_image.drawHeight = 75
 
-    elements.append(qr_image)
+    # QR verification text
+    qr_caption = Paragraph(
+        "<font size='8' color='#555555'>Scan this QR Code<br/>to verify this marksheet.</font>",
+        normal
+    )
 
-    # ---------------- Border ----------------
+    # ---------------- Footer (Signatures + Seal + QR) ----------------
+
+    coe_sign_path = os.path.join(
+        "static", "image", "coe_signature.png"
+    )
+    principal_sign_path = os.path.join(
+        "static", "image", "principal_signature.png"
+    )
+    seal_path = os.path.join(
+        "static", "image", "college_seal.png"
+    )
+
+    coe_sign_img = Image(coe_sign_path)
+    coe_sign_img.drawWidth = 90
+    coe_sign_img.drawHeight = 40
+    coe_sign_img.hAlign = "CENTER"
+
+    principal_sign_img = Image(principal_sign_path)
+    principal_sign_img.drawWidth = 90
+    principal_sign_img.drawHeight = 40
+    principal_sign_img.hAlign = "CENTER"
+
+    seal_img = Image(seal_path)
+    seal_img.drawWidth = 60
+    seal_img.drawHeight = 60
+    seal_img.hAlign = "CENTER"
+
+    qr_table = Table(
+        [[qr_image], [qr_caption]],
+        colWidths=[120]
+    )
+
+    seal_line = HRFlowable(width=80, thickness=1, color=colors.black)
+    sign_line = HRFlowable(width=110, thickness=1, color=colors.black)
+
+    footer = Table(
+        [
+            [seal_img, principal_sign_img, coe_sign_img],
+            [seal_line, sign_line, sign_line],
+            [
+                Paragraph("<b>College Seal</b>", normal),
+                Paragraph("<b>Principal</b>", normal),
+                Paragraph("<b>Controller of Examination</b>", normal)
+            ],
+            ["", qr_table, ""]
+        ],
+        colWidths=[180, 220, 220]
+    )
+
+    footer.setStyle(
+        TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("TOPPADDING", (0, 0), (-1, -1), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ])
+    )
+
+    elements.append(footer)
+
+    # ---------------- Border + Watermark ----------------
 
     def draw_border(canvas, doc):
         canvas.saveState()
+
+        # Outer border
         canvas.setStrokeColor(colors.HexColor("#1565C0"))
         canvas.setLineWidth(3)
         canvas.rect(
@@ -601,6 +867,17 @@ def download_result():
             doc.pagesize[0] - 40,
             doc.pagesize[1] - 40
         )
+
+        # Draw diagonal "ROYAL COLLEGE" watermark behind content
+        canvas.saveState()
+        canvas.setFont("Helvetica-Bold", 70)
+        canvas.setFillColor(colors.HexColor("#B0C4DE"))
+        canvas.setFillAlpha(0.18)
+        canvas.translate(doc.pagesize[0] / 2, doc.pagesize[1] / 2)
+        canvas.rotate(45)
+        canvas.drawCentredString(0, 0, "ROYAL COLLEGE")
+        canvas.restoreState()
+
         canvas.restoreState()
 
     doc.build(
@@ -611,20 +888,235 @@ def download_result():
 
     buffer.seek(0)
 
+    # Clean up temp files (QR & graph)
     try:
-         os.unlink(temp_qr.name)
-    except:
-      pass
+        os.unlink(temp_qr.name)
+    except Exception:
+        pass
+
+    for f in temp_files:
+        try:
+            os.unlink(f)
+        except Exception:
+            pass
 
     return send_file(
-       buffer,
-    as_attachment=True,
-    download_name=f"{student.name}_Marksheet.pdf",
-    mimetype="application/pdf"
-)
+        buffer,
+        as_attachment=True,
+        download_name=f"{student.name}_Marksheet.pdf",
+        mimetype="application/pdf"
+    )
 
-   
- 
+def get_grade_point(grade):
+    grade_points = {
+        "A+": 10,
+        "A": 9,
+        "B+": 8,
+        "B": 7,
+        "C": 6,
+        "D": 5,
+        "F": 0
+    }
+
+    return grade_points.get(grade, 0)
+
+
+def calculate_sgpa(results):
+
+    total_credit_points = 0
+    total_credits = 0
+
+    for result in results:
+
+        credit = 2
+
+        grade_point = get_grade_point(result.grade)
+
+        total_credit_points += grade_point * credit
+
+        total_credits += credit
+
+    if total_credits == 0:
+        return 0
+
+    return round(total_credit_points / total_credits, 2)
+
+
+def calculate_cgpa(student_id):
+
+    semesters = (
+        db.session.query(Result.semester)
+        .filter_by(student_id=student_id)
+        .distinct()
+        .order_by(Result.semester)
+        .all()
+    )
+
+    sgpa_list = []
+
+    for semester in semesters:
+
+        semester_results = Result.query.filter_by(
+            student_id=student_id,
+            semester=semester[0]
+        ).all()
+
+        sgpa_list.append(
+            calculate_sgpa(semester_results)
+        )
+
+    if len(sgpa_list) == 0:
+        return 0
+
+    return round(sum(sgpa_list) / len(sgpa_list), 2)
+
+
+def semester_sgpas(student_id):
+
+    data = []
+
+    semesters = (
+        db.session.query(Result.semester)
+        .filter_by(student_id=student_id)
+        .distinct()
+        .order_by(Result.semester)
+        .all()
+    )
+
+    for semester in semesters:
+
+        semester_results = Result.query.filter_by(
+            student_id=student_id,
+            semester=semester[0]
+        ).all()
+
+        data.append({
+            "semester": semester[0],
+            "sgpa": calculate_sgpa(semester_results)
+        })
+
+    return data
+
+
+def get_seat_number(student):
+    """Generate a university seat number based on the student ID."""
+    course_code = "RC"
+    if student.course:
+        # Take first two letters of the first word in course name
+        course_code = student.course.split()[0][:2].upper()
+
+    return f"{course_code}{datetime.now().year}{student.id:04d}"
+
+
+def ensure_static_assets():
+    """Generate placeholder images (signatures, seal, photo) if they don't exist."""
+    image_dir = os.path.join("static", "image")
+    os.makedirs(image_dir, exist_ok=True)
+
+    # Generate COE signature placeholder
+    coe_path = os.path.join(image_dir, "coe_signature.png")
+    if not os.path.exists(coe_path):
+        img = PILImage.new("RGBA", (360, 120), (255, 255, 255, 0))
+        draw = PILDraw.Draw(img)
+        draw.line([(15, 80), (160, 55)], fill=(0, 51, 102, 255), width=3)
+        draw.line([(160, 55), (300, 72)], fill=(0, 51, 102, 255), width=3)
+        draw.arc((60, 5, 250, 115), 200, 340, fill=(0, 51, 102, 255), width=2)
+        draw.text((15, 90), "Controller of Examination", fill=(0, 51, 102, 255))
+        img.save(coe_path)
+
+    # Generate Principal signature placeholder
+    principal_path = os.path.join(image_dir, "principal_signature.png")
+    if not os.path.exists(principal_path):
+        img = PILImage.new("RGBA", (360, 120), (255, 255, 255, 0))
+        draw = PILDraw.Draw(img)
+        draw.line([(20, 55), (175, 70)], fill=(0, 51, 102, 255), width=3)
+        draw.line([(175, 70), (330, 45)], fill=(0, 51, 102, 255), width=3)
+        draw.arc((70, 0, 280, 120), 20, 160, fill=(0, 51, 102, 255), width=2)
+        draw.text((15, 90), "Principal", fill=(0, 51, 102, 255))
+        img.save(principal_path)
+
+    # Generate college seal placeholder
+    seal_path = os.path.join(image_dir, "college_seal.png")
+    if not os.path.exists(seal_path):
+        img = PILImage.new("RGB", (260, 260), (255, 255, 255))
+        draw = PILDraw.Draw(img)
+        draw.ellipse((10, 10, 250, 250), outline=(0, 51, 102, 255), width=6)
+        draw.ellipse((30, 30, 230, 230), outline=(0, 51, 102, 255), width=2)
+        draw.text((55, 115), "ROYAL COLLEGE", fill=(0, 51, 102, 255))
+        draw.text((105, 135), "SEAL", fill=(0, 51, 102, 255))
+        img.save(seal_path)
+
+    return True
+
+
+def generate_student_photo(student):
+    """Generate a placeholder student photo if no real photo is available."""
+    photo_dir = os.path.join("static", "image")
+    os.makedirs(photo_dir, exist_ok=True)
+
+    photo_path = os.path.join(photo_dir, f"student_{student.id}.png")
+
+    if not os.path.exists(photo_path):
+        img = PILImage.new("RGB", (220, 260), (245, 247, 250))
+        draw = PILDraw.Draw(img)
+        # Avatar head
+        draw.ellipse((55, 20, 165, 130), fill=(176, 196, 222), outline=(100, 130, 160), width=2)
+        # Body / shoulders
+        draw.rounded_rectangle(
+            (35, 140, 185, 250),
+            radius=40,
+            fill=(176, 196, 222),
+            outline=(100, 130, 160),
+            width=2
+        )
+        draw.text((60, 210), "PHOTO", fill=(70, 90, 120))
+        img.save(photo_path)
+
+    return photo_path
+
+
+def generate_sgpa_graph(sgpa_data, student):
+    """Generate a bar chart of semester-wise SGPA."""
+    semesters = [f"S{e['semester']}" for e in sgpa_data]
+    sgpas = [e["sgpa"] for e in sgpa_data]
+
+    fig, ax = plt.subplots(figsize=(4.2, 2.2))
+    bar_colors = [
+        "#1565C0", "#42A5F5", "#64B5F6", "#1E88E5",
+        "#0D47A1", "#82B1FF", "#1976D2", "#2196F3"
+    ]
+
+    ax.bar(
+        semesters,
+        sgpas,
+        color=bar_colors[:len(semesters)],
+        edgecolor="#0d47a1"
+    )
+
+    ax.set_ylim(0, 10)
+    ax.set_ylabel("SGPA", fontsize=9)
+    ax.set_xlabel("Semester", fontsize=9)
+    ax.set_title("Semester-wise SGPA", fontsize=10, fontweight="bold")
+    ax.tick_params(labelsize=8)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Add value labels on top of each bar
+    for i, v in enumerate(sgpas):
+        ax.text(
+            i, v + 0.15, f"{v:.2f}",
+            ha="center", fontsize=8, fontweight="bold"
+        )
+
+    graph_path = os.path.join(
+        "static", "image", f"sgpa_graph_{student.id}.png"
+    )
+
+    plt.tight_layout()
+    fig.savefig(graph_path, dpi=120)
+    plt.close(fig)
+
+    return graph_path
 
 # ==================== PRINCIPAL ROUTES ====================
 
@@ -1651,6 +2143,26 @@ def manage_results():
         "teacher/manage_results.html",
         students=students,
         subjects=subjects
+    )
+
+@app.route("/view_results")
+def view_results():
+
+    if session.get("role") != "Teacher":
+        return redirect("/login")
+
+    teacher = User.query.get(session["user_id"])
+
+    results = (
+        Result.query
+        .filter_by(department_id=teacher.department_id)
+        .order_by(Result.semester, Result.student_id, Result.subject_id)
+        .all()
+    )
+
+    return render_template(
+        "teacher/view_results.html",
+        results=results
     )
 
 @app.route("/get_subjects/<int:semester>")
