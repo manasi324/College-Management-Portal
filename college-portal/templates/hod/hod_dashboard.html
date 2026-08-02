@@ -24,6 +24,7 @@
             transition:.3s;
             text-decoration:none;
             color:black;
+            cursor:pointer;
         }
 
         .card-box:hover{
@@ -48,6 +49,7 @@
         .green{background:#25c9a6;}
         .pink{background:#f05ac9;}
         .orange{background:#ffb347;}
+        .purple{background:linear-gradient(135deg, #a18cd1, #fbc2eb);}
     </style>
 </head>
 
@@ -106,33 +108,26 @@
                 <div class="icon green">
                     <i class="bi bi-megaphone-fill"></i>
                 </div>
-        
+
                 <h4 class="text-center">Department Notices</h4>
                 <p class="text-center text-muted">
                     Manage Notices
                 </p>
             </a>
         </div>
-        
+
         <div class="col-md-6 col-lg-4">
+            <a href="/department_events" class="card card-box p-4">
+                <div class="icon orange">
+                    <i class="bi bi-calendar-event-fill"></i>
+                </div>
 
-    <a href="/department_events" class="card card-box p-4">
-
-        <div class="icon orange">
-            <i class="bi bi-calendar-event-fill"></i>
+                <h4 class="text-center">College Events</h4>
+                <p class="text-center text-muted">
+                    View Upcoming College Events
+                </p>
+            </a>
         </div>
-
-        <h4 class="text-center">
-            College Events
-        </h4>
-
-        <p class="text-center text-muted">
-            View Upcoming College Events
-        </p>
-
-    </a>
-
-</div>
 
         <div class="col-md-6 col-lg-4">
             <a href="/study_materials" class="card card-box p-4">
@@ -148,25 +143,35 @@
         </div>
 
         <div class="col-md-6 col-lg-4">
-    <a href="/department_attendance" class="card card-box p-4">
+            <a href="/department_attendance" class="card card-box p-4">
+                <div class="icon blue">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
 
-        <div class="icon blue">
-            <i class="bi bi-bar-chart-fill"></i>
+                <h4 class="text-center">Attendance Analytics</h4>
+                <p class="text-center text-muted">
+                    View Department Attendance
+                </p>
+            </a>
         </div>
 
-        <h4 class="text-center">
-            Attendance Analytics
-        </h4>
+<!-- ==================== DEPARTMENT PERFORMANCE = link to new page ==================== -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('hod_department_performance') }}" class="card card-box p-4">
+                <div class="icon purple">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
 
-        <p class="text-center text-muted">
-            View Department Attendance
-        </p>
-
-    </a>
-</div>
+                <h4 class="text-center">Department Performance</h4>
+                <p class="text-center text-muted">
+                    Avg: {{ department_avg }}% · Passed: {{ passed }} · Distinction: {{ distinction }}
+                </p>
+            </a>
+        </div>
     </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

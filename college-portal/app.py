@@ -61,6 +61,16 @@ with app.app_context():
 with app.app_context():
     db.create_all()
 
+# Safe migration: add notice.student_id column (for personal warnings) if missing
+with app.app_context():
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE notice ADD COLUMN student_id INT"))
+        db.session.commit()
+        print("✅ Added notice.student_id column (personal warnings)")
+    except Exception:
+        db.session.rollback()
+
 
 # ==================== HOME ====================
 
@@ -158,12 +168,32 @@ def logout():
 def register():
     if request.method == 'POST':
         role = request.form['role']
+        email = request.form['email']
+        password = request.form['password']
+
+        departments = Department.query.all()
+
+        # ----- Duplicate check: email must be unique across User + Student -----
+        duplicate_error = None
+
+        if User.query.filter_by(email=email).first():
+            duplicate_error = "This email is already registered. Please use a different email or login."
+
+        if not duplicate_error and Student.query.filter_by(email=email).first():
+            duplicate_error = "This email is already registered as a student. Please use a different email or login."
+
+        if duplicate_error:
+            return render_template(
+                'public/register.html',
+                departments=departments,
+                error=duplicate_error
+            )
 
         if role == "Student":
             student = Student(
                 name=request.form['name'],
-                email=request.form['email'],
-                password=request.form['password'],
+                email=email,
+                password=password,
                 course=request.form['course'],
                 year=request.form['year'],
                 department_id=Department.query.filter_by(
@@ -179,18 +209,10 @@ def register():
                 name=request.form['department']
             ).first()
 
-            if User.query.filter_by(email=request.form['email']).first():
-                departments = Department.query.all()
-                return render_template(
-                    'register.html',
-                    departments=departments,
-                    error="Email already registered"
-                )
-
             user = User(
                 name=request.form['name'],
-                email=request.form['email'],
-                password=request.form['password'],
+                email=email,
+                password=password,
                 role="HOD",
                 department_id=department.id
             )
@@ -213,8 +235,8 @@ def register():
 
             user = User(
                 name=request.form['name'],
-                email=request.form['email'],
-                password=request.form['password'],
+                email=email,
+                password=password,
                 role="Teacher",
                 department_id=department.id
             )
@@ -229,7 +251,15 @@ def register():
 
             db.session.add(teacher)
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            return render_template(
+                'public/register.html',
+                departments=departments,
+                error="Registration failed. That email or details may already exist."
+            )
 
         return redirect('/login')
 
@@ -263,7 +293,21 @@ def profile():
 def student_notices():
     if 'student_id' not in session:
         return redirect('/login')
-    notices = Notice.query.all()
+
+    student = Student.query.get(session['student_id'])
+
+    # Students see: college notices + their department notices + personal notices
+    notices = (
+        Notice.query
+        .filter(
+            (Notice.scope == "College") |
+            ((Notice.scope == "Department") & (Notice.department_id == student.department_id)) |
+            ((Notice.scope == "Student") & (Notice.student_id == student.id))
+        )
+        .order_by(Notice.id.desc())
+        .all()
+    )
+
     return render_template('public/notices.html', notices=notices)
 
 
@@ -1008,6 +1052,95 @@ def get_seat_number(student):
     return f"{course_code}{datetime.now().year}{student.id:04d}"
 
 
+def calculate_student_percentage(student_id):
+    """Calculate average percentage for a student across all results."""
+    results = Result.query.filter_by(student_id=student_id).all()
+    if not results:
+        return 0.0
+    return round(sum(r.total for r in results) / len(results), 2)
+
+
+def get_department_rankings():
+    """Rank departments by average student percentage."""
+    departments = Department.query.all()
+    rankings = []
+
+    for dept in departments:
+        students = Student.query.filter_by(department_id=dept.id).all()
+        total_pct = 0
+        count = 0
+
+        for s in students:
+            pct = calculate_student_percentage(s.id)
+            if pct > 0:
+                total_pct += pct
+                count += 1
+
+        avg_pct = round(total_pct / count, 2) if count else 0.0
+
+        rankings.append({
+            "department": dept,
+            "avg_percentage": avg_pct,
+            "student_count": count
+        })
+
+    rankings.sort(key=lambda x: x["avg_percentage"], reverse=True)
+
+    for i, r in enumerate(rankings):
+        r["rank"] = i + 1
+
+    return rankings
+
+
+def get_class_toppers(limit=10):
+    """Get top students across the whole college."""
+    students = Student.query.all()
+    toppers = []
+
+    for s in students:
+        pct = calculate_student_percentage(s.id)
+        if pct > 0:
+            toppers.append({
+                "student": s,
+                "percentage": pct,
+                "cgpa": calculate_cgpa(s.id)
+            })
+
+    toppers.sort(key=lambda x: x["percentage"], reverse=True)
+
+    return toppers[:limit]
+
+
+def get_department_toppers():
+    """Get class topper(s) for each department."""
+    departments = Department.query.all()
+    dept_toppers = []
+
+    for dept in departments:
+        students = Student.query.filter_by(department_id=dept.id).all()
+        dept_students = []
+
+        for s in students:
+            pct = calculate_student_percentage(s.id)
+            if pct > 0:
+                dept_students.append({
+                    "student": s,
+                    "percentage": pct,
+                    "cgpa": calculate_cgpa(s.id)
+                })
+
+        dept_students.sort(key=lambda x: x["percentage"], reverse=True)
+
+        if dept_students:
+            dept_toppers.append({
+                "department": dept,
+                "topper": dept_students[0],
+                "top_3": dept_students[:3]
+            })
+
+    return dept_toppers
+
+
 def ensure_static_assets():
     """Generate placeholder images (signatures, seal, photo) if they don't exist."""
     image_dir = os.path.join("static", "image")
@@ -1118,13 +1251,117 @@ def generate_sgpa_graph(sgpa_data, student):
 
     return graph_path
 
+# ==================== PRINCIPAL PERFORMANCE PAGES ====================
+
+@app.route('/principal/department_rankings')
+def principal_department_rankings():
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    department_rankings = get_department_rankings()
+    return render_template('principal/department_rankings.html', department_rankings=department_rankings)
+
+
+@app.route('/principal/college_toppers')
+def principal_college_toppers():
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    class_toppers = get_class_toppers(limit=10)
+    return render_template('principal/college_toppers.html', class_toppers=class_toppers)
+
+
+@app.route('/principal/department_toppers')
+def principal_department_toppers():
+    if session.get("role") != "Principal":
+        return redirect("/login")
+    department_toppers = get_department_toppers()
+    return render_template('principal/department_toppers.html', department_toppers=department_toppers)
+
+
+# ==================== HOD PERFORMANCE PAGE ====================
+
+@app.route('/hod/department_performance')
+def hod_department_performance():
+    if session.get("role") != "HOD":
+        return redirect("/login")
+
+    hod = User.query.get(session["user_id"])
+    if hod is None:
+        session.clear()
+        flash("Session expired. Please login again.", "warning")
+        return redirect("/login")
+
+    performance_data = []
+    department_avg = 0
+    passed = 0
+    failed = 0
+    distinction = 0
+    first_class = 0
+
+    try:
+        students = Student.query.filter_by(
+            department_id=hod.department_id
+        ).all()
+
+        for s in students:
+            pct = calculate_student_percentage(s.id)
+            performance_data.append({
+                "student": s,
+                "percentage": pct,
+                "cgpa": calculate_cgpa(s.id)
+            })
+
+        performance_data.sort(key=lambda x: x["percentage"], reverse=True)
+
+        for i, d in enumerate(performance_data):
+            d["rank"] = i + 1
+
+        if performance_data:
+            department_avg = round(
+                sum(d["percentage"] for d in performance_data) / len(performance_data),
+                2
+            )
+
+        passed = sum(1 for d in performance_data if d["percentage"] >= 40)
+        failed = len(performance_data) - passed
+        distinction = sum(1 for d in performance_data if d["percentage"] >= 75)
+        first_class = sum(1 for d in performance_data if 60 <= d["percentage"] < 75)
+    except Exception as perf_error:
+        print("⚠️ Performance panel error (non-fatal):", perf_error)
+
+    return render_template(
+        'hod/department_performance.html',
+        hod=hod,
+        performance_data=performance_data,
+        department_avg=department_avg,
+        passed=passed,
+        failed=failed,
+        distinction=distinction,
+        first_class=first_class
+    )
+
+
 # ==================== PRINCIPAL ROUTES ====================
 
 @app.route( '/principal_dashboard')
 def principal_dashboard():
     if session.get("role") != "Principal":
         return redirect("/login")
-    return render_template('principal/principal_dashboard.html')
+
+    # Department performance rankings
+    department_rankings = get_department_rankings()
+
+    # College-wide top students
+    class_toppers = get_class_toppers(limit=10)
+
+    # Topper from each department (top 3)
+    department_toppers = get_department_toppers()
+
+    return render_template(
+        'principal/principal_dashboard.html',
+        department_rankings=department_rankings,
+        class_toppers=class_toppers,
+        department_toppers=department_toppers
+    )
 
 
 @app.route('/students')
@@ -1501,22 +1738,84 @@ def hod_dashboard():
 
     hod = User.query.get(session["user_id"])
 
-    total_students = Student.query.filter_by(
-        department_id=hod.department_id
-    ).count()
+    # Safety: if the current user is not found, redirect to login
+    if hod is None:
+        session.clear()
+        flash("Session expired. Please login again.", "warning")
+        return redirect("/login")
 
-    total_teachers = User.query.filter_by(
-        role="Teacher",
-        department_id=hod.department_id
-    ).count()
+    department_id = hod.department_id or session.get("department_id")
 
-    total_notices = Notice.query.filter_by(
-        department_id=hod.department_id
-    ).count()
+    # Default summary values (safe if anything below fails)
+    total_students = 0
+    total_teachers = 0
+    total_notices = 0
+    total_materials = 0
 
-    total_materials = Material.query.filter_by(
-        department_id=hod.department_id
-    ).count()
+    try:
+        total_students = Student.query.filter_by(
+            department_id=department_id
+        ).count()
+
+        total_teachers = User.query.filter_by(
+            role="Teacher",
+            department_id=department_id
+        ).count()
+
+        total_notices = Notice.query.filter_by(
+            department_id=department_id
+        ).count()
+
+        total_materials = Material.query.filter_by(
+            department_id=department_id
+        ).count()
+    except Exception as count_error:
+        print("⚠️ HOD counts error (non-fatal):", count_error)
+
+    # ---- Student Performance Panel ----
+    performance_data = []
+    department_avg = 0
+    passed = 0
+    failed = 0
+    distinction = 0
+    first_class = 0
+
+    try:
+        students = Student.query.filter_by(
+            department_id=hod.department_id
+        ).all()
+
+        for s in students:
+            pct = calculate_student_percentage(s.id)
+            performance_data.append({
+                "student": s,
+                "percentage": pct,
+                "cgpa": calculate_cgpa(s.id)
+            })
+
+        # Rank students by percentage (highest first)
+        performance_data.sort(key=lambda x: x["percentage"], reverse=True)
+
+        for i, d in enumerate(performance_data):
+            d["rank"] = i + 1
+
+        # Average department performance
+        if performance_data:
+            department_avg = round(
+                sum(d["percentage"] for d in performance_data) / len(performance_data),
+                2
+            )
+
+        # Pass / Fail summary
+        passed = sum(1 for d in performance_data if d["percentage"] >= 40)
+        failed = len(performance_data) - passed
+
+        # Distinction / First class counts
+        distinction = sum(1 for d in performance_data if d["percentage"] >= 75)
+        first_class = sum(1 for d in performance_data if 60 <= d["percentage"] < 75)
+    except Exception as perf_error:
+        # Log but do NOT crash the dashboard if performance queries fail
+        print("⚠️ Performance panel error (non-fatal):", perf_error)
 
     return render_template(
         "hod/hod_dashboard.html",
@@ -1524,7 +1823,13 @@ def hod_dashboard():
         total_students=total_students,
         total_teachers=total_teachers,
         total_notices=total_notices,
-        total_materials=total_materials
+        total_materials=total_materials,
+        performance_data=performance_data,
+        department_avg=department_avg,
+        passed=passed,
+        failed=failed,
+        distinction=distinction,
+        first_class=first_class
     )
 
 @app.route("/hod_students")
@@ -1804,13 +2109,15 @@ def send_warning(student_id):
         title="Attendance Warning",
         description=f"Your attendance is only {percentage}%. Please improve your attendance immediately to avoid disciplinary action.",
         department_id=student.department_id,
-        created_by=session["user_id"]
+        created_by=session["user_id"],
+        scope="Student",
+        student_id=student.id
     )
 
     db.session.add(notice)
     db.session.commit()
 
-    flash("Warning notice sent successfully!", "success")
+    flash(f"Warning notice sent to {student.name} successfully!", "success")
 
     return redirect("/department_attendance")
 
@@ -1822,7 +2129,6 @@ def assignments():
 @app.route("/marks")
 def marks():
     return "<h2>Internal Marks - Coming Soon</h2>"
-
 
 # ==================== TEACHER DASHBOARD ====================
 

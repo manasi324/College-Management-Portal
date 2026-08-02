@@ -1,14 +1,16 @@
-# Marksheet PDF Enhancement - Task Tracker
+# College Management Portal - Task Tracker
 
-## Plan
-- [x] Analyze current app.py & confirm requirements with user
-- [x] Fix existing errors (HRFlowable import, send_file syntax, redirect)
+## Original Fixes (app.py errors)
+- [x] 1. Add missing `HRFlowable` import from `reportlab.platypus`
+- [x] 2. Fix `send_file` syntax error (move `os.unlink` cleanup out of call args)
+- [x] 3. Fix wrong redirect `/my_result` → `/student_results`
+- [x] 4. Verify with `python -m py_compile app.py` → exit code 0
 
-## Enhancements
+## Marksheet PDF Enhancements
 - [x] 1. Add imports (matplotlib, PIL) for graph & placeholder image generation
-- [x] 2. Add helper functions (get_seat_number, ensure_static_assets, generate_student_photo, generate_sgpa_graph)
+- [x] 2. Add helper functions (get_seat_number, ensure_static_assets, generate_student_photo, generate_sgpa_graph, get_grade_point, calculate_sgpa, calculate_cgpa, semester_sgpas)
 - [x] 3. Add Seat/Roll number + Student photograph in info section
-- [x] 4. Fix marks table column widths (10 columns)
+- [x] 4. Fix marks table column widths (10 columns with Credits & Grade Point)
 - [x] 5. Add Semester-wise SGPA table
 - [x] 6. Add Semester-wise SGPA bar graph (matplotlib)
 - [x] 7. Add Principal & COE digital signature images in footer
@@ -16,12 +18,55 @@
 - [x] 9. Add QR verification text below QR code
 - [x] 10. Add Result Declaration note
 - [x] 11. Add "ROYAL COLLEGE" watermark behind content
-- [x] 12. Verify with `python -m py_compile app.py` → exit code 0
+- [x] 12. Switch to A4 landscape page size with proper margins
+- [x] 13. Add CGPA/SGPA to student summary
+- [x] 14. Add Performance Summary box
 
-## Additional Fix
-- [x] 13. Add missing `/view_results` route (was referenced by `edit_result` & `delete_result` redirects)
-- [x] 14. Create `templates/teacher/view_results.html` so the redirects don't 404
-- [x] 15. Verify with `python -m py_compile app.py` → exit code 0
+## Additional Routes & Fixes
+- [x] 1. Add missing `/view_results` route (was referenced by `edit_result` & `delete_result` redirects)
+- [x] 2. Create `templates/teacher/view_results.html` so the redirects don't 404
+- [x] 3. Fix `manage_results` to include `practical=0` in new Result creation
+- [x] 4. Update student dashboard route to pass `cga` & `sgpa_data`
+
+## Student Notices & Models Fix
+- [x] 1. Update `student_notices` route to show College + Department + Personal (Student scope) notices
+- [x] 2. Add `student_id` column + `student` relationship to the `Notice` model in `models.py`
+- [x] 3. Update `send_warning` route to include `scope="Student"` and `student_id`
+- [x] 4. Clean up duplicate `student_id`/`student` definitions in `Notice` model
+- [x] 5. Verified `python -m py_compile app.py models.py` → exit code 0
+
+## Performance Dashboard Enhancements
+- [x] 1. Add `calculate_student_percentage` helper function
+- [x] 2. Add `get_department_rankings` helper (rank departments by avg %)
+- [x] 3. Add `get_class_toppers` helper (top 10 college-wide)
+- [x] 4. Add `get_department_toppers` helper (top 3 per department)
+- [x] 5. Update `principal_dashboard` route to pass ranking/topper data
+- [x] 6. Update `principal_dashboard.html` with rankings & toppers sections
+- [x] 7. Update `hod_dashboard` route with performance panel data
+- [x] 8. Update `hod_dashboard.html` with Department Performance panel
+
+## Dashboard Redesign (Clickable Performance Cards → New Pages)
+- [x] 1. Principal: Department Rankings → clickable card linking to `/principal/department_rankings` page
+- [x] 2. Principal: College Toppers → clickable card linking to `/principal/college_toppers` page
+- [x] 3. Principal: Department-wise Toppers → clickable card linking to `/principal/department_toppers` page
+- [x] 4. HOD: Department Performance → clickable card linking to `/hod/department_performance` page
+- [x] 5. New routes added in `app.py` for each performance page
+- [x] 6. New templates created: `principal/department_rankings.html`, `principal/college_toppers.html`, `principal/department_toppers.html`, `hod/department_performance.html`
+- [x] 7. Each page has a "Back to Dashboard" button for easy navigation
+- [x] 8. Python syntax check: `python -m py_compile app.py` → exit code 0
+
+## HOD Dashboard Crash Fix (view returned None)
+- [x] 1. Diagnose the "view function did not return a valid response" error
+- [x] 2. Verified `hod_dashboard` function source has a proper `return` (AST-based diag)
+- [x] 3. Verified `hod/hod_dashboard.html` template renders fine with mock data (pure Jinja2 test)
+- [x] 4. Root cause: DB query exceptions (schema drift) inside the route could crash the view
+- [x] 5. Wrap HOD counts in try/except → non-fatal logging
+- [x] 6. Wrap performance panel computation in try/except → non-fatal logging
+- [x] 7. Add `hod is None` safety check → clear session + redirect to login
+- [x] 8. `ast.parse(app.py)` syntax check → SYNTAX OK
+
+## Verification
+- [x] `python -m py_compile app.py` → exit code 0
 
 ## Notes
 - `requirement.txt` already lists `matplotlib==3.10.0` and `pillow`.

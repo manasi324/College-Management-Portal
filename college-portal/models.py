@@ -20,12 +20,15 @@ class Notice(db.Model):
     description = db.Column(db.Text, nullable=False) 
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # Personal notices (e.g. attendance warnings) are targeted at a specific student
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     department = db.relationship('Department')
-    author = db.relationship('User') 
+    author = db.relationship('User')
+    student = db.relationship('Student')
     scope = db.Column(
-    db.String(20),
-    default="College"
-)
+        db.String(20),
+        default="College"
+    )
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
