@@ -2,220 +2,218 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principal Dashboard</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
-        body {
-            background: #f4f6fb;
-            font-family: 'Segoe UI', sans-serif;
+        body{
+            background:#f4f7fc;
         }
-        .top-nav {
-            background: linear-gradient(90deg, #4e54c8, #8f94fb);
-            padding: 15px 30px;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-        .top-nav h4 { margin: 0; font-weight: 600; }
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 18px;
-            border-radius: 8px;
-            text-decoration: none;
-        }
-        .logout-btn:hover { background: rgba(255,255,255,0.35); color: white; }
 
-        .action-card {
-            background: white;
-            border-radius: 14px;
-            padding: 28px;
-            text-align: center;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: #333;
-            transition: all 0.25s;
-            display: block;
-            height: 100%;
-            cursor: pointer;
-            border: none;
+        .navbar{
+            background:linear-gradient(90deg,#1f3cff,#6b2cff);
         }
-        .action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 22px rgba(0,0,0,0.1);
-            color: #4e54c8;
-        }
-        .action-card .icon-box {
-            width: 60px; height: 60px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 15px;
-            color: white;
-            font-size: 26px;
-        }
-        .gradient-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .gradient-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        .gradient-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .gradient-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-        .gradient-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
-        .gradient-6 { background: linear-gradient(135deg, #f7971e, #ffd200); }
-        .gradient-7 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
-        .gradient-8 { background: linear-gradient(135deg, #0c3483, #a2b6df); }
 
-        .rank-card {
-            border: none;
-            border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-            overflow: hidden;
+        .card-box{
+            border:none;
+            border-radius:18px;
+            box-shadow:0 8px 20px rgba(0,0,0,.08);
+            transition:.3s;
+            text-decoration:none;
+            color:black;
+            cursor:pointer;
+            display:block;
+            height:100%;
         }
-        .rank-badge {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
+
+        .card-box:hover{
+            transform:translateY(-5px);
         }
-        .rank-1 { background: linear-gradient(135deg, #f7971e, #ffd200); }
-        .rank-2 { background: linear-gradient(135deg, #8e9eab, #eef2f3); color: #333; }
-        .rank-3 { background: linear-gradient(135deg, #b87333, #e6b980); }
-        .rank-other { background: linear-gradient(135deg, #4e54c8, #8f94fb); }
-        .section-title {
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 4px;
+
+        .icon{
+            width:70px;
+            height:70px;
+            border-radius:18px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:30px;
+            color:white;
+            margin:auto;
+            margin-top:20px;
+            margin-bottom:20px;
         }
-        .topper-list li {
-            border-radius: 8px;
-            padding: 6px 10px;
-            transition: background 0.2s;
-        }
-        .topper-list li:hover { background: #f1f3fb; }
-        .crown { color: #f7971e; }
-        .dept-card {
-            border: none;
-            border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-        }
-        .expandable-content {
-            border-top: 1px solid #e9ecef;
-            padding-top: 20px;
-            margin-top: 15px;
-        }
-        .badge-stat {
-            font-size: 0.85rem;
-            padding: 4px 10px;
-        }
+
+        .blue{background:#4d7cff;}
+        .green{background:#25c9a6;}
+        .pink{background:#f05ac9;}
+        .orange{background:#ffb347;}
+        .purple{background:#8b5cf6;}
+        .red{background:#ff5d73;}
+        .cyan{background:#17a2b8;}
     </style>
 </head>
+
 <body>
 
-<div class="top-nav d-flex justify-content-between align-items-center">
-    <h4><i class="bi bi-mortarboard-fill"></i> Principal Dashboard</h4>
-    <a href="/logout" class="logout-btn">
-        <i class="bi bi-box-arrow-right"></i> Logout
-    </a>
-</div>
+<nav class="navbar navbar-dark">
+    <div class="container-fluid px-4">
+        <h3 class="text-white">
+            <i class="bi bi-mortarboard-fill"></i>
+            Principal Dashboard
+        </h3>
+
+        <a href="/logout" class="btn btn-outline-light">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</nav>
 
 <div class="container mt-5">
-    <h3 class="mb-1">Welcome back, Principal 👋</h3>
-    <p class="text-muted mb-4">Monitor department performance and manage your college from one place.</p>
 
-    <!-- ==================== MANAGEMENT ACTION CARDS ==================== -->
-    <div class="row g-3">
+    <h1>Welcome back, Principal 👋</h1>
+    <p class="text-muted">
+        Monitor department performance and manage your college from one place.
+    </p>
+
+    <div class="row mt-4 g-4">
+
+        <!-- Manage Students -->
         <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('students') }}" class="action-card">
-                <div class="icon-box gradient-1"><i class="bi bi-people"></i></div>
-                <h6 class="mb-1">Manage Students</h6>
-                <small class="text-muted">View & edit students</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('manage_teachers') }}" class="action-card">
-                <div class="icon-box gradient-2"><i class="bi bi-person-badge"></i></div>
-                <h6 class="mb-1">Manage Teachers</h6>
-                <small class="text-muted">Add & remove teachers</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('manage_hods') }}" class="action-card">
-                <div class="icon-box gradient-3"><i class="bi bi-person-workspace"></i></div>
-                <h6 class="mb-1">Manage HODs</h6>
-                <small class="text-muted">Department heads</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('manage_notices') }}" class="action-card">
-                <div class="icon-box gradient-4"><i class="bi bi-megaphone"></i></div>
-                <h6 class="mb-1">Manage Notices</h6>
-                <small class="text-muted">Post announcements</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('manage_events') }}" class="action-card">
-                <div class="icon-box gradient-5"><i class="bi bi-calendar-event"></i></div>
-                <h6 class="mb-1">Manage Events</h6>
-                <small class="text-muted">Schedule events</small>
+            <a href="{{ url_for('students') }}" class="card card-box p-4">
+                <div class="icon blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <h4 class="text-center">Manage Students</h4>
+                <p class="text-center text-muted">
+                    View & Edit Students
+                </p>
             </a>
         </div>
 
-<!-- ==================== PERFORMANCE CARDS (LINK TO NEW PAGES) ==================== -->
-
-        <!-- Department Performance Rankings -->
+        <!-- Manage Teachers -->
         <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('principal_department_rankings') }}" class="action-card">
-                <div class="icon-box gradient-6"><i class="bi bi-trophy-fill"></i></div>
-                <h6 class="mb-1">Department Rankings</h6>
-                <small class="text-muted">
+            <a href="{{ url_for('manage_teachers') }}" class="card card-box p-4">
+                <div class="icon pink">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+
+                <h4 class="text-center">Manage Teachers</h4>
+                <p class="text-center text-muted">
+                    Add & Remove Teachers
+                </p>
+            </a>
+        </div>
+
+        <!-- Manage HODs -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('manage_hods') }}" class="card card-box p-4">
+                <div class="icon purple">
+                    <i class="bi bi-person-workspace"></i>
+                </div>
+
+                <h4 class="text-center">Manage HODs</h4>
+                <p class="text-center text-muted">
+                    Department Heads
+                </p>
+            </a>
+        </div>
+
+        <!-- Manage Notices -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('manage_notices') }}" class="card card-box p-4">
+                <div class="icon green">
+                    <i class="bi bi-megaphone-fill"></i>
+                </div>
+
+                <h4 class="text-center">Manage Notices</h4>
+                <p class="text-center text-muted">
+                    Post Announcements
+                </p>
+            </a>
+        </div>
+
+        <!-- Manage Events -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('manage_events') }}" class="card card-box p-4">
+                <div class="icon orange">
+                    <i class="bi bi-calendar-event-fill"></i>
+                </div>
+
+                <h4 class="text-center">Manage Events</h4>
+                <p class="text-center text-muted">
+                    Schedule College Events
+                </p>
+            </a>
+        </div>
+
+        <!-- Department Rankings -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('principal_department_rankings') }}" class="card card-box p-4">
+                <div class="icon cyan">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+
+                <h4 class="text-center">Department Rankings</h4>
+                <p class="text-center text-muted">
                     {% if department_rankings %}
-                        {{ department_rankings|length }} departments · Top: 
+                        {{ department_rankings|length }} Departments ·
                         {% if department_rankings[0].avg_percentage > 0 %}
-                            {{ department_rankings[0].avg_percentage }}%
+                            Top: {{ department_rankings[0].avg_percentage }}%
                         {% else %}
                             No data
                         {% endif %}
                     {% else %}
-                        No rankings available
+                        No Rankings
                     {% endif %}
-                </small>
+                </p>
             </a>
         </div>
 
         <!-- College Toppers -->
         <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('principal_college_toppers') }}" class="action-card">
-                <div class="icon-box gradient-7"><i class="bi bi-award-fill"></i></div>
-                <h6 class="mb-1">College Toppers</h6>
-                <small class="text-muted">
+            <a href="{{ url_for('principal_college_toppers') }}" class="card card-box p-4">
+                <div class="icon red">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+
+                <h4 class="text-center">College Toppers</h4>
+                <p class="text-center text-muted">
                     {% if class_toppers %}
-                        Top 10 students · #1: {{ class_toppers[0].student.name }} ({{ class_toppers[0].percentage }}%)
+                        #1: {{ class_toppers[0].student.name }} ({{ class_toppers[0].percentage }}%)
                     {% else %}
-                        No topper data yet
+                        No Topper Data
                     {% endif %}
-                </small>
+                </p>
             </a>
         </div>
 
         <!-- Department-wise Toppers -->
         <div class="col-md-6 col-lg-4">
-            <a href="{{ url_for('principal_department_toppers') }}" class="action-card">
-                <div class="icon-box gradient-8"><i class="bi bi-mortarboard-fill"></i></div>
-                <h6 class="mb-1">Department Toppers</h6>
-                <small class="text-muted">
+            <a href="{{ url_for('principal_department_toppers') }}" class="card card-box p-4">
+                <div class="icon purple">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+
+                <h4 class="text-center">Department Toppers</h4>
+                <p class="text-center text-muted">
                     {% if department_toppers %}
-                        {{ department_toppers|length }} departments · Top 3 each
+                        {{ department_toppers|length }} Departments · Top 3 Each
                     {% else %}
-                        No data available
+                        No Data Available
                     {% endif %}
-                </small>
+                </p>
             </a>
         </div>
+
     </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

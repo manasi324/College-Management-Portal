@@ -2121,15 +2121,6 @@ def send_warning(student_id):
 
     return redirect("/department_attendance")
 
-@app.route("/assignments")
-def assignments():
-    return "<h2>Assignments - Coming Soon</h2>"
-
-
-@app.route("/marks")
-def marks():
-    return "<h2>Internal Marks - Coming Soon</h2>"
-
 # ==================== TEACHER DASHBOARD ====================
 
 @app.route("/teacher_dashboard")

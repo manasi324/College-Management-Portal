@@ -1,205 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   
-    <title>Student Dashboard</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
-</head>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body{
-            background:#f8f9fa;
+            background:#f4f7fc;
         }
 
-        .sidebar{
-            width:250px;
-            min-height:100vh;
+        .navbar{
+            background:linear-gradient(90deg,#1f3cff,#6b2cff);
         }
 
-        .sidebar a{
+        .card-box{
+            border:none;
+            border-radius:18px;
+            box-shadow:0 8px 20px rgba(0,0,0,.08);
+            transition:.3s;
             text-decoration:none;
-            color:white;
+            color:black;
+            cursor:pointer;
             display:block;
-            padding:10px;
-            border-radius:8px;
+            height:100%;
         }
 
-        .sidebar a:hover{
-            background:#0d6efd;
-            color:white;
-        }
-
-        .profile-img{
-            width:80px;
-            height:80px;
-            border-radius:50%;
-            object-fit:cover;
-        }
-
-        .card-hover:hover{
+        .card-box:hover{
             transform:translateY(-5px);
-            transition:0.3s;
         }
+
+        .icon{
+            width:70px;
+            height:70px;
+            border-radius:18px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:30px;
+            color:white;
+            margin:auto;
+            margin-top:20px;
+            margin-bottom:20px;
+        }
+
+        .blue{background:#4d7cff;}
+        .green{background:#25c9a6;}
+        .pink{background:#f05ac9;}
+        .orange{background:#ffb347;}
+        .purple{background:#8b5cf6;}
+        .red{background:#ff5d73;}
     </style>
+</head>
 
 <body>
 
-<div class="d-flex">
+<nav class="navbar navbar-dark">
+    <div class="container-fluid px-4">
+        <h3 class="text-white">
+            <i class="bi bi-mortarboard-fill"></i>
+            Student Dashboard
+        </h3>
 
-    <!-- Sidebar -->
-    <div class="sidebar bg-dark text-white p-3">
-
-        <div class="text-center">
-
-            <img src="https://via.placeholder.com/80"
-                 class="profile-img mb-3">
-
-            <h4>{{ student.name }}</h4>
-
-            <p>{{ student.email }}</p>
-
-        </div>
-
-        <hr>
-<a href="/profile" class="text-white d-block mb-3">
-    <i class="bi bi-person-circle"></i> Profile
-</a>
-
-<a href="{{ url_for('student_notices') }}" class="text-white d-block mb-3">
-    <i class="bi bi-megaphone"></i> Notices
-</a>
-
-<a href="{{ url_for('student_events') }}" class="text-white d-block mb-3">
-    <i class="bi bi-calendar-event"></i> Events
-</a>
-
-<a href="/student_materials" class="text-white d-block mb-3">
-    <i class="bi bi-book"></i> Study Materials (TEST)
-</a>
-
-<a href="/student_results">
-    <i class="bi bi-file-earmark-text"></i>
-    Results
-</a>
-
-<a href="/logout" class="text-danger d-block">
-    <i class="bi bi-box-arrow-right"></i> Logout
-</a>
-       
+        <a href="/logout" class="btn btn-outline-light">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
     </div>
+</nav>
 
-    <!-- Main Content -->
-    <div class="flex-grow-1 p-4">
+<div class="container mt-5">
 
-        <!-- Welcome Card -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
+    <h1>Welcome, {{ student.name }} 👋</h1>
+    <p class="text-muted">
+        College Management & Student Information Portal
+    </p>
 
-                <h2>
-                    Welcome, {{ student.name }} 👋
-                </h2>
+    <div class="row mt-4 g-4">
 
-                <p class="text-muted">
-                    College Management & Student Information Portal
+        <!-- Profile -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/profile" class="card card-box p-4">
+                <div class="icon blue">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+
+                <h4 class="text-center">My Profile</h4>
+                <p class="text-center text-muted">
+                    View & Edit Profile
                 </p>
-
-            </div>
+            </a>
         </div>
 
-        <!-- Dashboard Cards -->
-        <div class="row">
-
-            <div class="col-md-4">
-                <div class="card shadow card-hover">
-                    <div class="card-body text-center">
-                        <h3>📢 Notices</h3>
-                        <p>View latest college notices.</p>
-                    </div>
+        <!-- Notices -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('student_notices') }}" class="card card-box p-4">
+                <div class="icon green">
+                    <i class="bi bi-megaphone-fill"></i>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card shadow card-hover">
-                    <div class="card-body text-center">
-                        <h3>📅 Events</h3>
-                        <p>Upcoming college events.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card shadow card-hover">
-                    <div class="card-body text-center">
-                        <h3>📚 Study Materials</h3>
-                        <p>Access notes and resources.</p>
-                    </div>
-                </div>
-            </div>
-           <div class="col-md-4 mb-4">
-
-    <a href="/student_results" class="text-decoration-none">
-
-        <div class="card shadow-sm h-100">
-
-            <div class="card-body text-center">
-
-                <h2>📊</h2>
-
-                <h3>Results</h3>
-
-                <p class="text-muted">
-                    View semester-wise results and download marksheets.
+                <h4 class="text-center">Notices</h4>
+                <p class="text-center text-muted">
+                    View Latest Notices
                 </p>
-
-            </div>
-
+            </a>
         </div>
 
-    </a>
-
-</div>
-        </div>
-
-        <!-- Student Information -->
-        <div class="card shadow mt-4">
-
-            <div class="card-header bg-primary text-white">
-                Student Information
-            </div>
-
-            <div class="card-body">
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <p><strong>Name:</strong> {{ student.name }}</p>
-                        <p><strong>Email:</strong> {{ student.email }}</p>
-                    </div>
-
-                    <div class="col-md-6">
-                        <p><strong>Course:</strong> {{ student.course }}</p>
-                        <p><strong>Year:</strong> {{ student.year }}</p>
-                    </div>
-
+        <!-- Events -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('student_events') }}" class="card card-box p-4">
+                <div class="icon orange">
+                    <i class="bi bi-calendar-event-fill"></i>
                 </div>
 
-            </div>
+                <h4 class="text-center">Events</h4>
+                <p class="text-center text-muted">
+                    Upcoming College Events
+                </p>
+            </a>
+        </div>
 
+        <!-- Study Materials -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/student_materials" class="card card-box p-4">
+                <div class="icon pink">
+                    <i class="bi bi-book-fill"></i>
+                </div>
+
+                <h4 class="text-center">Study Materials</h4>
+                <p class="text-center text-muted">
+                    Access Notes & Resources
+                </p>
+            </a>
+        </div>
+
+        <!-- Results -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/student_results" class="card card-box p-4">
+                <div class="icon purple">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+
+                <h4 class="text-center">Results</h4>
+                <p class="text-center text-muted">
+                    View Results & Download Marksheet
+                </p>
+            </a>
         </div>
 
     </div>
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
+
