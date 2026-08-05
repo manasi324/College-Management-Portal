@@ -224,7 +224,7 @@ document.getElementById("loadSubjects").onclick = function () {
         else if (examType == "Practical")
             total = 30;
 
-        else if (examType == "Assignment / Journal / Attendance")
+else if (examType == "Assignment")
             total = 20;
 
         data.forEach(subject => {
@@ -292,11 +292,17 @@ document.getElementById("examType").addEventListener("change", function () {
     else if (this.value == "Practical")
         total = 30;
 
-    else if (this.value == "Assignment")
+else if (this.value == "Assignment")
         total = 20;
 
+    // Update the displayed Total Marks column
     document.querySelectorAll(".totalMarks").forEach(function(box){
         box.value = total;
+    });
+
+    // Also update the max limit on the marks input fields
+    document.querySelectorAll("[name='marks[]']").forEach(function(box){
+        box.max = total;
     });
 
 });

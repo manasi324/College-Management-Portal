@@ -103,36 +103,24 @@ class Result(db.Model):
         db.ForeignKey("users.id"),
         nullable=False
     )
-
     department_id = db.Column(
         db.Integer,
         db.ForeignKey("departments.id"),
         nullable=False
     )
-
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey("subjects.id"),
         nullable=False
     )
-
     semester = db.Column(db.Integer)
-
     internal = db.Column(db.Integer, default=0)
-
     assignment = db.Column(db.Integer, default=0)
-
     external = db.Column(db.Integer, default=0)
-
-    # NEW
     practical = db.Column(db.Integer, default=0)
-
     total = db.Column(db.Integer)
-
     grade = db.Column(db.String(5))
-
     status = db.Column(db.String(20))
-
     student = db.relationship("Student")
     teacher = db.relationship("User")
     department = db.relationship("Department")

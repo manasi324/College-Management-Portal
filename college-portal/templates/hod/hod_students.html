@@ -29,9 +29,9 @@
                 </thead>
 
                 <tbody>
-                    {% for student in students %}
+{% for student in students %}
                     <tr>
-                        <td>{{ student.id }}</td>
+                        <td>{{ loop.index + 100 }}</td>
                         <td>{{ student.name }}</td>
                         <td>{{ student.email }}</td>
                         <td>{{ student.course }}</td>

@@ -495,10 +495,12 @@ def download_result():
 
     # ---------------- Student Information + Photograph ----------------
 
+    display_id = get_display_student_id(student)
+
     student_info = [
         ["Student Name", student.name],
         ["University Seat No.", seat_number],
-        ["Student ID", str(student.id)],
+        ["Student ID", str(display_id)],
         ["Course", student.course],
         ["Semester", str(results[0].semester)],
         ["Academic Year", "2026-2027"],
@@ -799,13 +801,13 @@ def download_result():
 
     elements.append(Spacer(1, 15))
 
-    # ---------------- QR Code ----------------
+# ---------------- QR Code ----------------
 
     qr_data = f"""
 ROYAL COLLEGE
 
 Student Name : {student.name}
-Student ID   : {student.id}
+Student ID   : {display_id}
 Course       : {student.course}
 Semester     : {results[0].semester}
 
@@ -1050,6 +1052,18 @@ def get_seat_number(student):
         course_code = student.course.split()[0][:2].upper()
 
     return f"{course_code}{datetime.now().year}{student.id:04d}"
+
+
+def get_display_student_id(student):
+    """Return a clean sequential student ID (101, 102, ...) based on registration order."""
+    try:
+        all_students = Student.query.order_by(Student.id).all()
+        for index, s in enumerate(all_students):
+            if s.id == student.id:
+                return index + 101
+    except Exception:
+        pass
+    return student.id
 
 
 def calculate_student_percentage(student_id):

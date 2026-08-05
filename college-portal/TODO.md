@@ -60,6 +60,18 @@
 - [x] 2. Removed duplicate "Back to Dashboard" button from `student/profile.html`
 - [x] 3. Fixed Study Materials back button: `/student_dashboard` (404) → `/dashboard` (working) in `student/student_materials.html`
 
+## Multi-Department Subjects Fix
+- [x] 1. Diagnosed: `seed_subjects.py` only seeded subjects for BSC CS & IT — other departments (BCOM, BAF, BMS, BAMMC) had no subjects in the database
+- [x] 2. Updated `seed_subjects.py` to add subjects for all 5 departments (BSC CS & IT, BCOM, BAF, BMS, BAMMC) across semesters 1-6
+- [x] 3. Ran `python seed_subjects.py` to insert the subjects into the database
+- [x] 4. Now teachers from any department can load subjects by department for result management
+
+## Result Management Marks Limit Fix
+- [x] 1. Fixed `manage_results.html`: the JS `change` handler now updates the `max` attribute on the mark input fields when the Exam Type changes (previously only updated the display, leaving a stale max=20)
+- [x] 2. Fixed mismatch: dropdown sends `value="Assignment"` but JS checked `"Assignment / Journal / Attendance"` — corrected both the load function and change handler to use `"Assignment"`
+- [x] 3. Confirmed External/Practical marks are out of 30 (max=30), Internal/Assignment out of 20 (max=20)
+- [x] 4. Verified backend `app.py` matches `exam_type == "Assignment"` correctly
+
 ## Unified Dashboard UI (Principal + Student → Match HOD/Teacher Style)
 - [x] 1. Redesigned `templates/principal/principal_dashboard.html` to use the same card-box style as HOD/Teacher dashboards (gradient navbar, 70px rounded icons, centered h4 titles)
 - [x] 2. Redesigned `templates/student/dashboard.html` to use the same card-box style (removed old dark sidebar layout)
@@ -87,6 +99,15 @@
 - [x] 6. Wrap performance panel computation in try/except → non-fatal logging
 - [x] 7. Add `hod is None` safety check → clear session + redirect to login
 - [x] 8. `ast.parse(app.py)` syntax check → SYNTAX OK
+
+## Sequential Student Display ID (101, 102, ...) Consistency
+- [x] 1. Added `get_display_student_id(student)` helper in `app.py` (returns `index + 101` based on registration order)
+- [x] 2. PDF marksheet info table uses `display_id` for "Student ID"
+- [x] 3. QR code data uses `display_id` (matches PDF + lists)
+- [x] 4. Templates use `{{ loop.index + 100 }}` for consistency:
+  - `principal/students.html`, `hod/hod_students.html`, `teacher/attendance.html`, `teacher/manage_results.html`, `hod/department_attendance.html`
+- [x] 5. Fixed QR block indentation (`qr_data` was dedented outside `download_result` → `IndentationError`)
+- [x] 6. Verified `python -m py_compile app.py` → SYNTAX OK
 
 ## Verification
 - [x] `python -m py_compile app.py` → exit code 0
