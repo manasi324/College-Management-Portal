@@ -44,10 +44,10 @@
 
 <tr>
 
-    <th>Semester</th>
+<th>Semester</th>
     <th>Subject</th>
     <th>Internal</th>
-    <th>Assignment</th>
+    <th>{{ marks_scheme.others_label }}</th>
     <th>External</th>
     <th>Practical</th>
     <th>Total</th>
@@ -73,6 +73,8 @@
 type="number"
 class="form-control"
 name="internal_{{ result.id }}"
+min="0"
+max="{{ marks_scheme.internal }}"
 value="{{ result.internal }}">
 </td>
 
@@ -81,6 +83,8 @@ value="{{ result.internal }}">
 type="number"
 class="form-control"
 name="assignment_{{ result.id }}"
+min="0"
+max="{{ marks_scheme.assignment }}"
 value="{{ result.assignment }}">
 </td>
 
@@ -89,6 +93,8 @@ value="{{ result.assignment }}">
 type="number"
 class="form-control"
 name="external_{{ result.id }}"
+min="0"
+max="{{ marks_scheme.external }}"
 value="{{ result.external }}">
 </td>
 
@@ -97,6 +103,8 @@ value="{{ result.external }}">
 type="number"
 class="form-control"
 name="practical_{{ result.id }}"
+min="0"
+max="{{ marks_scheme.practical }}"
 value="{{ result.practical }}">
 </td>
 

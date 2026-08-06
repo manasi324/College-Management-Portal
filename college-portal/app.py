@@ -72,6 +72,34 @@ with app.app_context():
         db.session.rollback()
 
 
+# ==================== MARKS SCHEME ====================
+
+def get_marks_scheme(department_name):
+    """
+    Return the marks distribution scheme for a given department.
+
+    BSC CS & IT: Internal=20, Assignment=20, External=30, Practical=30 (Total=100)
+    All other departments: Internal=20, Others=20, External=60, Practical=0 (Total=100)
+    """
+    if department_name == "BSC CS & IT":
+        return {
+            "internal": 20,
+            "assignment": 20,
+            "external": 30,
+            "practical": 30,
+            "total": 100,
+            "others_label": "Assignment"
+        }
+    return {
+        "internal": 20,
+        "assignment": 20,
+        "external": 60,
+        "practical": 0,
+        "total": 100,
+        "others_label": "Others"
+    }
+
+
 # ==================== HOME ====================
 
 @app.route("/")
@@ -370,7 +398,8 @@ def student_results():
     return render_template(
         "student/my_results.html",
         student=student,
-        results=results
+        results=results,
+        marks_scheme=get_marks_scheme(student.department.name if student.department else None)
     )
 
 @app.route("/download_result")
@@ -380,6 +409,8 @@ def download_result():
         return redirect("/login")
 
     student = Student.query.get(session["student_id"])
+
+    marks_scheme = get_marks_scheme(student.department.name if student.department else None)
 
     results = (
         Result.query
@@ -549,14 +580,14 @@ def download_result():
 
     elements.append(Spacer(1, 25))
 
-    # ---------------- Marks Table ----------------
+# ---------------- Marks Table ----------------
 
     table_data = [[
         "Subject",
         "Credits",
         "Grade Point",
         "Internal",
-        "Assignment",
+        marks_scheme["others_label"],
         "External",
         "Practical",
         "Total",
@@ -2450,10 +2481,13 @@ def manage_results():
 
         return redirect("/manage_results")
 
+    marks_scheme = get_marks_scheme(teacher.department.name if teacher.department else None)
+
     return render_template(
         "teacher/manage_results.html",
         students=students,
-        subjects=subjects
+        subjects=subjects,
+        marks_scheme=marks_scheme
     )
 
 @app.route("/view_results")
@@ -2471,9 +2505,12 @@ def view_results():
         .all()
     )
 
+    marks_scheme = get_marks_scheme(teacher.department.name if teacher.department else None)
+
     return render_template(
         "teacher/view_results.html",
-        results=results
+        results=results,
+        marks_scheme=marks_scheme
     )
 
 @app.route("/get_subjects/<int:semester>")
@@ -2542,10 +2579,14 @@ def edit_result(id):
 
         return redirect("/view_results")
 
+    marks_scheme = get_marks_scheme(result.department.name if result.department else None)
+
     return render_template(
         "teacher/edit_result.html",
-        result=result
+        result=result,
+        marks_scheme=marks_scheme
     )
+
 @app.route("/delete_result/<int:id>")
 def delete_result(id):
 
@@ -2619,7 +2660,8 @@ def student_result(student_id):
     return render_template(
         "teacher/student_result.html",
         student=student,
-        results=results
+        results=results,
+        marks_scheme=get_marks_scheme(student.department.name if student.department else None)
     )
 # ==================== DEPARTMENT PANEL OF HOME PAGE  ====================
 @app.route("/department/<int:id>")

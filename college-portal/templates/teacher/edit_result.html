@@ -83,14 +83,14 @@ readonly>
 
 <div class="col-md-3">
 
-<label>Internal (20)</label>
+<label>Internal ({{ marks_scheme.internal }})</label>
 
 <input
 type="number"
 class="form-control mark"
 name="internal"
 min="0"
-max="20"
+max="{{ marks_scheme.internal }}"
 value="{{ result.internal }}"
 required>
 
@@ -98,14 +98,14 @@ required>
 
 <div class="col-md-3">
 
-<label>Assignment (20)</label>
+<label>{{ marks_scheme.others_label }} ({{ marks_scheme.assignment }})</label>
 
 <input
 type="number"
 class="form-control mark"
 name="assignment"
 min="0"
-max="20"
+max="{{ marks_scheme.assignment }}"
 value="{{ result.assignment }}"
 required>
 
@@ -113,14 +113,14 @@ required>
 
 <div class="col-md-3">
 
-<label>External (30)</label>
+<label>External ({{ marks_scheme.external }})</label>
 
 <input
 type="number"
 class="form-control mark"
 name="external"
 min="0"
-max="30"
+max="{{ marks_scheme.external }}"
 value="{{ result.external }}"
 required>
 
@@ -128,14 +128,14 @@ required>
 
 <div class="col-md-3">
 
-<label>Practical (30)</label>
+<label>Practical ({{ marks_scheme.practical }})</label>
 
 <input
 type="number"
 class="form-control mark"
 name="practical"
 min="0"
-max="30"
+max="{{ marks_scheme.practical }}"
 value="{{ result.practical }}"
 required>
 

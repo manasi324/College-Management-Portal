@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
@@ -31,6 +32,10 @@
             color:white;
         }
 
+        h5{
+            font-weight:600;
+        }
+
     </style>
 
 </head>
@@ -39,208 +44,247 @@
 
 <div class="container mt-5">
 
-<div class="card">
+    <div class="card">
 
-<div class="card-header bg-primary text-white">
+        <div class="card-header bg-primary text-white">
 
-<h3>Student Result Entry</h3>
+            <h3 class="mb-0">Student Result Entry</h3>
 
-</div>
+        </div>
 
-<div class="card-body">
+        <div class="card-body">
 
-<form method="POST">
+            <form method="POST">
 
-<div class="row">
+                <div class="row">
 
-<div class="col-md-3 mb-3">
+                    <!-- Semester -->
 
-<label>Semester</label>
+                    <div class="col-md-3 mb-3">
 
-<select class="form-select" name="semester" required>
+                        <label class="form-label">Semester</label>
 
-<option value="">Select</option>
+                        <select class="form-select" name="semester" required>
 
-<option>Semester 1</option>
-<option>Semester 2</option>
-<option>Semester 3</option>
-<option>Semester 4</option>
-<option>Semester 5</option>
-<option>Semester 6</option>
+                            <option value="">Select Semester</option>
 
-</select>
+                            <option>Semester 1</option>
+                            <option>Semester 2</option>
+                            <option>Semester 3</option>
+                            <option>Semester 4</option>
+                            <option>Semester 5</option>
+                            <option>Semester 6</option>
 
-</div>
+                        </select>
 
-<div class="col-md-3 mb-3">
+                    </div>
 
-<label>Exam Type</label>
+                    <!-- Exam Type -->
 
-<select
-    class="form-select"
-    id="examType"
-    name="exam_type"
-    required>
+                    <div class="col-md-3 mb-3">
 
-    <option value="">Select</option>
-    <option value="Internal">Internal</option>
-    <option value="External">External</option>
-    <option value="Practical">Practical</option>
-    <option value="Assignment">Assignment / Journal / Attendance</option>
+                        <label class="form-label">Exam Type</label>
 
-</select>
+                        <select
+                            class="form-select"
+                            id="examType"
+                            name="exam_type"
+                            required>
 
-</div>
+                            <option value="">Select Exam Type</option>
+                            <option value="Internal">Internal</option>
+                            <option value="External">External</option>
+                            {% if marks_scheme.practical > 0 %}
+                            <option value="Practical">Practical</option>
+                            {% endif %}
+                            <option value="Assignment">{{ marks_scheme.others_label }} (PPT / Attendance)</option>
 
-<div class="col-md-3 mb-3">
+                        </select>
 
-<label>Exam Name</label>
+                    </div>
 
-<input
-type="text"
-class="form-control"
-name="exam_name"
-placeholder="UT-1 / UT-2 / Semester End"
-required>
+                    <!-- Exam Name -->
 
-</div>
+                    <div class="col-md-3 mb-3">
 
-<div class="col-md-3 mb-3">
+                        <label class="form-label">Exam Name</label>
 
-<label>Student</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="exam_name"
+                            placeholder="UT-1 / Semester End"
+                            required>
 
-<select class="form-select" name="student_id" required>
+                    </div>
 
-<option value="">Select Student</option>
+                    <!-- Student -->
 
-{% for student in students %}
+                    <div class="col-md-3 mb-3">
 
-<option value="{{ student.id }}">
-{{ student.name }}
-</option>
+                        <label class="form-label">Student</label>
 
-{% endfor %}
+                        <select class="form-select" name="student_id" required>
 
-</select>
+                            <option value="">Select Student</option>
 
-</div>
+                            {% for student in students %}
 
-</div>
+                            <option value="{{ student.id }}">
+                                {{ student.name }}
+                            </option>
 
-<hr>
+                            {% endfor %}
 
-<h5>Subject Wise Marks</h5>
+                        </select>
 
-<table class="table table-bordered">
+                    </div>
 
-    <thead>
-        <tr>
-            <th>Subject</th>
-            <th>Marks Obtained</th>
-            <th>Total Marks</th>
-        </tr>
-    </thead>
+                </div>
 
-    <tbody id="subjectsTable">
-    </tbody>
+                <div class="text-center mb-4">
 
-</table>
+                    <button
+                        type="button"
+                        id="loadSubjects"
+                        class="btn btn-primary">
 
-<div class="text-center">
+                        Load Subjects
 
-<button class="btn btn-save px-5">
+                    </button>
 
-Save Result
+                </div>
 
-</button>
+                <hr>
 
-</div>
-<div class="text-center mt-3">
+                <h5>Subject Wise Marks</h5>
 
-    <button
-        type="button"
-        id="loadSubjects"
-        class="btn btn-primary">
+                <table class="table table-bordered">
 
-        Load Subjects
+                    <thead class="table-light">
 
-    </button>
+                        <tr>
 
-</div>
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
+                            <th>Subject</th>
+                            <th width="200">Marks Obtained</th>
+                            <th width="200">Total Marks</th>
 
-        {% for category, message in messages %}
+                        </tr>
 
-            <div class="alert alert-{{ category }}">
-                {{ message }}
-            </div>
+                    </thead>
 
-        {% endfor %}
+                    <tbody id="subjectsTable">
 
-    {% endif %}
-{% endwith %}
-</form>
+                    </tbody>
 
-</div>
+                </table>
 
-</div>
+                <div class="text-center">
+
+                    <button type="submit" class="btn btn-save px-5">
+
+                        Save Result
+
+                    </button>
+
+                </div>
+
+            </form>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="alert alert-{{ category }} mt-3">
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+            {% endwith %}
+
+        </div>
+
+    </div>
 
 </div>
 
 <script>
 
-document.getElementById("loadSubjects").onclick = function () {
+function getTotalMarks(examType) {
+
+    switch (examType) {
+
+        case "Internal":
+            return {{ marks_scheme.internal }};
+
+        case "External":
+            return {{ marks_scheme.external }};
+
+        case "Practical":
+            return {{ marks_scheme.practical }};
+
+        case "Assignment":
+            return {{ marks_scheme.assignment }};
+
+        default:
+            return 0;
+
+    }
+
+}
+
+document.getElementById("loadSubjects").addEventListener("click", function(){
 
     let semester = document.querySelector("[name='semester']").value;
     let examType = document.getElementById("examType").value;
 
-    if (semester == "") {
-        alert("Select Semester First");
+    if(semester==""){
+
+        alert("Please select Semester.");
         return;
+
     }
 
-    semester = semester.replace("Semester ", "");
+    if(examType==""){
+
+        alert("Please select Exam Type.");
+        return;
+
+    }
+
+    semester = semester.replace("Semester ","");
 
     fetch("/get_subjects/" + semester)
 
     .then(response => response.json())
 
-    .then(data => {
+    .then(data=>{
 
-        let table = document.getElementById("subjectsTable");
+        let tbody = document.getElementById("subjectsTable");
 
-        table.innerHTML = "";
+        tbody.innerHTML="";
 
-        // Decide total marks
-        let total = 0;
+        let total = getTotalMarks(examType);
 
-        if (examType === "Internal")
-            total = 20;
+        data.forEach(subject=>{
 
-        else if (examType == "External")
-            total = 30;
-
-        else if (examType == "Practical")
-            total = 30;
-
-else if (examType == "Assignment")
-            total = 20;
-
-        data.forEach(subject => {
-
-            table.innerHTML += `
+            tbody.innerHTML += `
 
             <tr>
 
                 <td>
 
+                    ${subject.name}
+
                     <input
                         type="hidden"
                         name="subject[]"
                         value="${subject.name}">
-
-                    ${subject.name}
 
                 </td>
 
@@ -248,7 +292,7 @@ else if (examType == "Assignment")
 
                     <input
                         type="number"
-                        class="form-control"
+                        class="form-control marksInput"
                         name="marks[]"
                         min="0"
                         max="${total}"
@@ -275,38 +319,33 @@ else if (examType == "Assignment")
 
     });
 
-};
+});
 
+document.getElementById("examType").addEventListener("change", function(){
 
-// Change Total Marks when Exam Type changes
-document.getElementById("examType").addEventListener("change", function () {
+    let total = getTotalMarks(this.value);
 
-    let total = 0;
-
-    if (this.value == "Internal")
-        total = 20;
-
-    else if (this.value == "External")
-        total = 30;
-
-    else if (this.value == "Practical")
-        total = 30;
-
-else if (this.value == "Assignment")
-        total = 20;
-
-    // Update the displayed Total Marks column
     document.querySelectorAll(".totalMarks").forEach(function(box){
+
         box.value = total;
+
     });
 
-    // Also update the max limit on the marks input fields
-    document.querySelectorAll("[name='marks[]']").forEach(function(box){
+    document.querySelectorAll(".marksInput").forEach(function(box){
+
         box.max = total;
+
+        if(box.value > total){
+
+            box.value = "";
+
+        }
+
     });
 
 });
 
 </script>
+
 </body>
 </html>
